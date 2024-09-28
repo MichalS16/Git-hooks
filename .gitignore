@@ -141,7 +141,6 @@ acs-*.bib
 
 # knitr
 *-concordance.tex
-ignore its generated tikz files
 *.tikz
 *-tikzDictionary
 

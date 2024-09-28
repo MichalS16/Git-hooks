@@ -1,4 +1,4 @@
-# Git-hooks
+# Git-hooks (JEM224)
 
 ## About
 
@@ -14,7 +14,7 @@ The contributors to this project are:
 ## Contents
 
 The general theory about **Git-hooks** you can find in:
-TODO link
+[Theory](https://github.com/MichalS16/Git-hooks/blob/main/theory.md)
 
 The demonstration code you can find in:
-TODO link
+[Code demonstration](https://github.com/MichalS16/Git-hooks/blob/main/demonstration.py).
