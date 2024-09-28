@@ -16,13 +16,6 @@
 *.dvi
 *.xdv
 *-converted-to.*
-# these rules might exclude image files for figures etc.
-# *.ps
-# *.eps
-# *.pdf
-
-## Generated if empty string is given at "Please type another file name for output:"
-.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
@@ -43,11 +36,11 @@
 rubber.cache
 
 ## Build tool directories for auxiliary files
-# latexrun
+latexrun
 latex.out/
 
 ## Auxiliary and intermediate files from other packages:
-# algorithms
+algorithms
 *.alg
 *.loa
 
@@ -117,8 +110,8 @@ acs-*.bib
 *.slo
 *.sls
 
-# uncomment this for glossaries-extra (will ignore makeindex's style files!)
-# *.ist
+# glossaries-extra
+*.ist
 
 # gnuplot
 *.gnuplot
@@ -148,8 +141,8 @@ acs-*.bib
 
 # knitr
 *-concordance.tex
-# TODO Uncomment the next line if you use knitr and want to ignore its generated tikz files
-# *.tikz
+ignore its generated tikz files
+*.tikz
 *-tikzDictionary
 
 # listings
@@ -300,7 +293,5 @@ TSWLatexianTemp*
 # xwatermark package
 *.xwm
 
-# REVTeX puts footnotes in the bibliography by default, unless the nofootinbib
-# option is specified. Footnotes are the stored in a file with suffix Notes.bib.
-# Uncomment the next line to have this generated file ignored.
-#*Notes.bib
+# file with suffix Notes.bib.
+*Notes.bib
