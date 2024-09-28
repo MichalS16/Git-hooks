@@ -17,4 +17,4 @@ The general theory about **Git-hooks** you can find in:
 [Theory](https://github.com/MichalS16/Git-hooks/blob/main/theory.md)
 
 The demonstration code you can find in:
-[Code demonstration](https://github.com/MichalS16/Git-hooks/blob/main/demonstration.py).
+[Code demonstration](https://github.com/MichalS16/Git-hooks/blob/main/demonstration.py)
