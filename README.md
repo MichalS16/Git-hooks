@@ -19,5 +19,5 @@ The contributors to this project are:
 The general theory about **Git-hooks** you can find in:
 [Theory](https://github.com/MichalS16/Git-hooks/blob/main/theory.md)
 
-The demonstration code you can find in:
-[Code demonstration](https://github.com/MichalS16/Git-hooks/blob/main/demonstration.py)
+The demonstration of setting a **Git-hooks** you can find in:
+[Git-hooks examples](https://github.com/MichalS16/Git-hooks/blob/main/example.ipynb)
