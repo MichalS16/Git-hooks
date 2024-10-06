@@ -1,2 +1,2 @@
 #!/bin/bash
-echo "Your commit succeded. This is a message from IES squad."
+echo "HOOK - POST-COMMIT: Your commit succeded. This is a message from IES squad."
