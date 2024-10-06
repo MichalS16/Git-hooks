@@ -4,4 +4,4 @@
 # Copy each hook to the .git/hooks/ directory.
 cp -r "./hooks/"* ".git/hooks/"
 
-echo "Git hooks files have been copied from 'hooks/' folder to the '.git/hooks/' folder."
+echo "Git hooks files have been copied from the 'hooks/' folder to the '.git/hooks/' folder."
