@@ -297,3 +297,6 @@ TSWLatexianTemp*
 
 # file with suffix Notes.bib.
 *Notes.bib
+
+# virtual environment folder
+.venv/
