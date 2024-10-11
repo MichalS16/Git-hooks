@@ -32,11 +32,11 @@ Each type of hook plays a crucial role in enhancing workflow efficiency and main
 
 Client-side hooks are triggered by actions performed by developers in their local environment, such as committing code or merging branches. These hooks are essential for catching issues early, ensuring code quality before changes are pushed to the central repository. Key examples include:
 
-- **`pre-commit`**: Executes before a commit is finalized, allowing you to run linters, format code, and perform checks. This ensures that only code meeting your standards is committed.
+- **pre-commit**: Executes before a commit is finalized, allowing you to run linters, format code, and perform checks. This ensures that only code meeting your standards is committed.
 
-- **`prepare-commit-msg`**: Provides an opportunity to auto-populate or modify commit messages before they are saved. This can enforce message formatting or include relevant issue keys automatically.
+- **prepare-commit-msg**: Provides an opportunity to auto-populate or modify commit messages before they are saved. This can enforce message formatting or include relevant issue keys automatically.
 
-- **`post-commit`**: Runs immediately after a commit is made, making it ideal for tasks like sending notifications, updating logs, or cleaning up temporary files.
+- **post-commit**: Runs immediately after a commit is made, making it ideal for tasks like sending notifications, updating logs, or cleaning up temporary files.
 
 By implementing these hooks, developers can enhance their workflows and maintain a high standard of code quality.
 
@@ -44,13 +44,14 @@ By implementing these hooks, developers can enhance their workflows and maintain
 
 Server-side hooks are triggered on the Git server and play a crucial role in collaboration, ensuring consistency and quality across the team. They help enforce policies and automate processes related to code management. Key examples include:
 
-- **`pre-receive`**: Executes before any changes are pushed to the repository. This hook is useful for validating commit messages, enforcing coding standards, or running tests to ensure code quality before it is accepted.
+- **pre-receive**: Executes before any changes are pushed to the repository. This hook is useful for validating commit messages, enforcing coding standards, or running tests to ensure code quality before it is accepted.
 
-- **`post-receive`**: Runs immediately after changes are pushed to the repository. This hook is commonly used to trigger continuous integration (CI) pipelines or deployment scripts, automating the process of building, testing, and deploying code to production environments.
+- **post-receive**: Runs immediately after changes are pushed to the repository. This hook is commonly used to trigger continuous integration (CI) pipelines or deployment scripts, automating the process of building, testing, and deploying code to production environments.
 
 For further reading on the different types of Git hooks and their applications, you can refer to the following sources which the text referring:
 
-- [Git Hooks Documentation](https://git-scm.com/docs/githooks)  
+- [Git Hooks Documentation](https://git-scm.com/docs/githooks)
+
 - [Atlassian Git Hooks Tutorial](https://www.atlassian.com/git/tutorials/git-hooks)
 
 ## Git Hooks vs. GitHub Actions
@@ -63,15 +64,15 @@ On the other hand, **GitHub Actions** was launched by GitHub in November 2019. I
 
 ### Comparison
 
-| Feature                  | Git Hooks                                          | GitHub Actions                                      |
-|--------------------------|---------------------------------------------------|----------------------------------------------------|
-| **Execution Environment**| Local (developer's machine or server)             | Cloud-based (within GitHub)                        |
-| **Triggering Events**    | Specific Git operations (commit, merge, push)     | Various GitHub events (push, pull request, issue)  |
-| **Setup Complexity**     | Requires manual setup in `.git/hooks` directory   | Configured via YAML files in the repository         |
-| **Scalability**          | Limited to the local environment and can be cumbersome for teams | Highly scalable; designed for collaborative CI/CD workflows  |
-| **Integration**          | Works primarily with Git and local scripts         | Integrates with various third-party services, APIs, and tools |
-| **Flexibility**          | Customized for local workflows, but limited to Git actions | Highly customizable workflows with a vast ecosystem of actions available |
-| **Visibility**           | Local to the developer; less visibility for the team | Actions and results are visible on GitHub, fostering collaboration |
+| Feature                  | Git Hooks                                                        | GitHub Actions                                                           |
+|--------------------------|------------------------------------------------------------------|--------------------------------------------------------------------------|
+| **Execution Environment**| Local (developer's machine or server)                            | Cloud-based (within GitHub)                                              |
+| **Triggering Events**    | Specific Git operations (commit, merge, push)                    | Various GitHub events (push, pull request, issue)                        |
+| **Setup Complexity**     | Requires manual setup in `.git/hooks` directory                  | Configured via YAML files in the repository                              |
+| **Scalability**          | Limited to the local environment and can be cumbersome for teams | Highly scalable; designed for collaborative CI/CD workflows              |
+| **Integration**          | Works primarily with Git and local scripts                       | Integrates with various third-party services, APIs, and tools            |
+| **Flexibility**          | Customized for local workflows, but limited to Git actions       | Highly customizable workflows with a vast ecosystem of actions available |
+| **Visibility**           | Local to the developer; less visibility for the team             | Actions and results are visible on GitHub, fostering collaboration       |
 
 ### Current Relevance
 
