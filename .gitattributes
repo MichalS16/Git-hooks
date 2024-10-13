@@ -1,1 +1,1 @@
-# echo "secrets.txt filter=git-crypt diff=git-crypt" >> .gitattributes
+# echo "hooks/secrets.txt filter=git-crypt diff=git-crypt" >> .gitattributes

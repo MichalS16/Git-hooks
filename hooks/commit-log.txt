@@ -52,3 +52,9 @@ Author: DavidK
 Date: Sun Oct 13 23:19:46 2024 +0200
 Message: Hooks - post-commit - retrieve webhook URLs from secrets.txt (to be encrypted)
 
+------------------------------------------------
+Commit hash: ca4bc0873c9ae4a3e063d72842653c2857ad99b5
+Author: DavidK
+Date: Sun Oct 13 23:25:56 2024 +0200
+Message: Hooks - post-commit - added quotes to URLs in secrets.txt, a testing commit
+
