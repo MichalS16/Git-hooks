@@ -10,3 +10,9 @@ Author: DavidK
 Date: Sun Oct 13 20:58:43 2024 +0200
 Message: Hooks - post-commit - improve logging code to amend the commit with the log file
 
+------------------------------------------------
+Commit hash: 6b5b758af699a8ad6131855c32e22375318a3995
+Author: DavidK
+Date: Sun Oct 13 21:06:40 2024 +0200
+Message: Hooks - post-commit - add an automatic push code
+

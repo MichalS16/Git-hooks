@@ -67,5 +67,14 @@ rm -f "$FLAG_FILE"
 echo "Commit log updated and last commit amended."
 
 
+#######################
+######## Push #########
+#######################
+
+# Careful with this, more dangerous. Testing now, commenting it out later.
+# Optionally, could automatically push the commit to the remote repository
+git push --force-with-lease origin $(git branch --show-current)
+
+
 # Display the end message
 echo "HOOK - POST-COMMIT - END"
