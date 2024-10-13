@@ -85,12 +85,33 @@ SLACK_PAYLOAD="{
 # Send the string to Slack as a payload and capture the response
 RESPONSE=$(curl -s -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" $SLACK_WEBHOOK_URL)
 
-# Check if the response contains "ok"
+# Check if the response from Slack contains "ok"
 if [[ "$RESPONSE" == "ok" ]]; then
     echo "Slack notification sent."
 else
     echo "Slack notification unsuccessful."
 fi
+
+### Discord
+# Discord webhook URL (generated from Discord/Channel/Integrations/Webhook)
+DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1295122716323610694/KYvxVHxeG_2TvTj9a1vY6lSwAGCCbwDFNNRt1JzIUpiLr13PIo7S0MIVpy8gag6htRdZ"
+
+# Create JSON payload
+DISCORD_PAYLOAD="{
+    \"content\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: **$COMMIT_AUTHOR**\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
+}"
+
+# Send the string to Discord as a payload and capture the HTTP status code
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-type: application/json' --data "$DISCORD_PAYLOAD" $DISCORD_WEBHOOK_URL)
+
+# Check if the status code is 2xx (success)
+if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
+    echo "Discord notification sent."
+else
+    echo "Discord notification unsuccessful. Status code: $HTTP_STATUS"
+fi
+
+echo "Done sending notifications."
 
 
 #######################
