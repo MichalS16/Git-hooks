@@ -73,42 +73,64 @@ echo "Commit log updated and last commit amended."
 
 echo "Running post-commit notifications..."
 
+#--- URL retrieval ---#
+    FILE_SECRETS="hooks/secrets.txt"
+
+    # Check if the secrets file exists and is readable
+    if [ -f "$FILE_SECRETS" ]; then
+        # Read the secret URLs from the file
+        source "$FILE_SECRETS"
+    else
+        echo "Error: secrets.txt not found or not readable."
+        exit 1
+    fi
+
+# Webhook URLs retrieved from secrets.txt
+if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
+    echo "Webhook URLs successfully retrieved."
+
 ### Slack
-# Slack webhook URL (generated from Slack/Apps/Incoming WebHooks)
-SLACK_WEBHOOK_URL="https://hooks.slack.com/services/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"
+    # Slack webhook URL (generated from Slack/Apps/Incoming WebHooks)
+    # Retrieved from the git-crypted secrets.txt file
+        # SLACK_WEBHOOK_URL="https://hooks.slack.com/services/your/slack/webhook"
 
-# Create a JSON string
-SLACK_PAYLOAD="{
-    \"text\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: *$COMMIT_AUTHOR*\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
-}"
+    # Create a JSON string
+    SLACK_PAYLOAD="{
+        \"text\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: *$COMMIT_AUTHOR*\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
+    }"
 
-# Send the string to Slack as a payload and capture the response
-RESPONSE=$(curl -s -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" $SLACK_WEBHOOK_URL)
+    # Send the string to Slack as a payload and capture the response
+    RESPONSE=$(curl -s -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" $SLACK_WEBHOOK_URL)
 
-# Check if the response from Slack contains "ok"
-if [[ "$RESPONSE" == "ok" ]]; then
-    echo "Slack notification sent."
-else
-    echo "Slack notification unsuccessful."
-fi
+    # Check if the response from Slack contains "ok"
+    if [[ "$RESPONSE" == "ok" ]]; then
+        echo "Slack notification sent."
+    else
+        echo "Slack notification unsuccessful."
+    fi
 
 ### Discord
-# Discord webhook URL (generated from Discord/Channel/Integrations/Webhook)
-DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1295122716323610694/KYvxVHxeG_2TvTj9a1vY6lSwAGCCbwDFNNRt1JzIUpiLr13PIo7S0MIVpy8gag6htRdZ"
+    # Discord webhook URL (generated from Discord/Channel/Integrations/Webhook)
+    # Retrieved from the git-crypted secrets.txt file
+        # DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/your/discord/webhook"
 
-# Create JSON payload
-DISCORD_PAYLOAD="{
-    \"content\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: **$COMMIT_AUTHOR**\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
-}"
+    # Create JSON payload
+    DISCORD_PAYLOAD="{
+        \"content\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: **$COMMIT_AUTHOR**\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
+    }"
 
-# Send the string to Discord as a payload and capture the HTTP status code
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-type: application/json' --data "$DISCORD_PAYLOAD" $DISCORD_WEBHOOK_URL)
+    # Send the string to Discord as a payload and capture the HTTP status code
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-type: application/json' --data "$DISCORD_PAYLOAD" $DISCORD_WEBHOOK_URL)
 
-# Check if the status code is 2xx (success)
-if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
-    echo "Discord notification sent."
+    # Check if the status code is 2xx (success)
+    if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
+        echo "Discord notification sent."
+    else
+        echo "Discord notification unsuccessful. Status code: $HTTP_STATUS"
+    fi
+
 else
-    echo "Discord notification unsuccessful. Status code: $HTTP_STATUS"
+    echo "Error: Webhook URLs not found in secrets.txt."
 fi
 
 echo "Done sending notifications."

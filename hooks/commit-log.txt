@@ -46,3 +46,9 @@ Author: DavidK
 Date: Sun Oct 13 23:17:51 2024 +0200
 Message: Hooks - post-commit - create a secrets.txt file with webhook URLs (to be encrypted)
 
+------------------------------------------------
+Commit hash: 2b0f299549dd3a0393a8a2faa83b9aaade415db8
+Author: DavidK
+Date: Sun Oct 13 23:19:46 2024 +0200
+Message: Hooks - post-commit - retrieve webhook URLs from secrets.txt (to be encrypted)
+
