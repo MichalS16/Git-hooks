@@ -22,3 +22,9 @@ Author: DavidK
 Date: Sun Oct 13 21:14:41 2024 +0200
 Message: Hooks - post-commit - comment out the Push code for safety purposes
 
+------------------------------------------------
+Commit hash: 0674081b1fd25c03e81ff791620d2e9b2930a964
+Author: DavidK
+Date: Sun Oct 13 21:20:14 2024 +0200
+Message: Hooks - post-commit - add Notifications to Slack and edit documentation
+

@@ -68,6 +68,27 @@ echo "Commit log updated and last commit amended."
 
 
 #######################
+#### Notifications ####
+#######################
+
+echo "Running post-commit notifications..."
+
+### Slack
+# Slack webhook URL (generated from Slack/Apps/Incoming WebHooks)
+SLACK_WEBHOOK_URL="https://hooks.slack.com/services/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"
+
+# Create a JSON string
+SLACK_PAYLOAD="{
+    \"text\": \"Notification - a new commit by *$COMMIT_AUTHOR* on $COMMIT_DATE\nCommit: <$COMMIT_HASH>\nMessage: $COMMIT_MESSAGE\"
+}"
+
+# Send the string to Slack as a payload
+curl -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" $SLACK_WEBHOOK_URL
+
+echo "Slack notification sent."
+
+
+#######################
 ######## Push #########
 #######################
 
