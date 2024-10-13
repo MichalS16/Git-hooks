@@ -28,3 +28,9 @@ Author: DavidK
 Date: Sun Oct 13 21:20:14 2024 +0200
 Message: Hooks - post-commit - add Notifications to Slack and edit documentation
 
+------------------------------------------------
+Commit hash: 5113eed4b8ec2dc4ac5ba70a669371971fa97417
+Author: DavidK
+Date: Sun Oct 13 21:25:36 2024 +0200
+Message: Hooks - post-commit - improve Notifications to Slack
+

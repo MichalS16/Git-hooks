@@ -79,13 +79,18 @@ SLACK_WEBHOOK_URL="https://hooks.slack.com/services/T07RN5Y4DNX/B07R7N3LF6K/uyEh
 
 # Create a JSON string
 SLACK_PAYLOAD="{
-    \"text\": \"Notification - a new commit by *$COMMIT_AUTHOR* on $COMMIT_DATE\nCommit: <$COMMIT_HASH>\nMessage: $COMMIT_MESSAGE\"
+    \"text\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: *$COMMIT_AUTHOR*\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
 }"
 
-# Send the string to Slack as a payload
-curl -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" $SLACK_WEBHOOK_URL
+# Send the string to Slack as a payload and capture the response
+RESPONSE=$(curl -s -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" $SLACK_WEBHOOK_URL)
 
-echo "Slack notification sent."
+# Check if the response contains "ok"
+if [[ "$RESPONSE" == "ok" ]]; then
+    echo "Slack notification sent."
+else
+    echo "Slack notification unsuccessful."
+fi
 
 
 #######################
