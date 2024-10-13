@@ -16,3 +16,9 @@ Author: DavidK
 Date: Sun Oct 13 21:06:40 2024 +0200
 Message: Hooks - post-commit - add an automatic push code
 
+------------------------------------------------
+Commit hash: 1832df72187d9d8f3e2ef7d063e3fd71ed490d4d
+Author: DavidK
+Date: Sun Oct 13 21:14:41 2024 +0200
+Message: Hooks - post-commit - comment out the Push code for safety purposes
+
