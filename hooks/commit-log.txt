@@ -1,0 +1,12 @@
+------------------------------------------------
+Commit hash: fdb9b293044fb8753242ceacd35330af693b0de7
+Author: DavidK
+Date: Sun Oct 13 15:05:46 2024 +0200
+Message: Hooks - post-commit - add logging code
+
+------------------------------------------------
+Commit hash: ff522bef6d6181f80e35ccb13fd7c7668c190f1d
+Author: DavidK
+Date: Sun Oct 13 20:58:43 2024 +0200
+Message: Hooks - post-commit - improve logging code to amend the commit with the log file
+

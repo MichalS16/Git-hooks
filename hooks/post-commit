@@ -1,6 +1,24 @@
 #!/bin/bash
 # A Git post-commit hook that displays messages and additional information.
 
+
+#---------------------#
+#----- Flag check ----#
+#---------------------#
+
+# This check is necessary for our Logging part of code, where we amend the commit.
+# Without this flag check, the post-commit hook would enter an infinite loop.
+# Check if the commit has already been amended by looking for a flag file.
+FILE_FLAG=".amend-flag"
+
+if [ -f "$FILE_FLAG" ]; then
+    # If the flag file exists, remove it and exit to avoid an infinite loop
+    rm -f "$FILE_FLAG"
+    echo "Exiting the re-triggered hook to avoid loop."
+    exit 0
+fi
+
+
 #######################
 ####### Messages ######
 #######################
@@ -33,6 +51,20 @@ echo "Message: $COMMIT_MESSAGE" >> $FILE_LOG
 echo "" >> $FILE_LOG
 
 echo "Done appending commit details to $FILE_LOG."
+
+# Stage the log file so it gets included in the commit
+git add $FILE_LOG
+
+# Create the flag file to prevent re-triggering the hook
+touch "$FILE_FLAG"
+
+# Amend the last commit to include the updated log file, without changing the commit message
+git commit --amend --no-edit
+
+# Remove the flag file after the commit is amended
+rm -f "$FLAG_FILE"
+
+echo "Commit log updated and last commit amended."
 
 
 # Display the end message
