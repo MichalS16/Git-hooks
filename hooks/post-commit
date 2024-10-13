@@ -9,5 +9,31 @@ echo "HOOK - POST-COMMIT - START:"
 echo "Your commit succeeded. This is a message from IES squad."
 
 
+#######################
+####### Logging #######
+#######################
+
+echo "Logging commit details..."
+
+# Log file location
+FILE_LOG="hooks/commit-log.txt"
+
+# Prepare the commit details
+COMMIT_HASH=$(git log -1 --pretty=format:"%H")
+COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
+COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
+COMMIT_DATE=$(git log -1 --pretty=format:"%ad")
+
+# Append info to the log file
+echo "------------------------------------------------" >> $FILE_LOG
+echo "Commit hash: $COMMIT_HASH" >> $FILE_LOG
+echo "Author: $COMMIT_AUTHOR" >> $FILE_LOG
+echo "Date: $COMMIT_DATE" >> $FILE_LOG
+echo "Message: $COMMIT_MESSAGE" >> $FILE_LOG
+echo "" >> $FILE_LOG
+
+echo "Done appending commit details to $FILE_LOG."
+
+
 # Display the end message
 echo "HOOK - POST-COMMIT - END"
