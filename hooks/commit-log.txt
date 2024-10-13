@@ -40,3 +40,9 @@ Author: DavidK
 Date: Sun Oct 13 22:46:31 2024 +0200
 Message: Hooks - post-commit - add Notification to Discord
 
+------------------------------------------------
+Commit hash: 74109ce07f5443c9664ad8a2772a72d33ae0856b
+Author: DavidK
+Date: Sun Oct 13 23:17:51 2024 +0200
+Message: Hooks - post-commit - create a secrets.txt file with webhook URLs (to be encrypted)
+
