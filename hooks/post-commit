@@ -98,6 +98,10 @@ if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
     SLACK_PAYLOAD="{
         \"text\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: *$COMMIT_AUTHOR*\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
     }"
+    
+    # Trim any leading or trailing whitespace from the SLACK_WEBHOOK_URL.
+    # This is necessary when the variable is on the first line of the secret.txt file.
+    SLACK_WEBHOOK_URL=$(echo "$SLACK_WEBHOOK_URL" | tr -d '\r' | xargs)
 
     # Send the string to Slack as a payload and capture the response
     RESPONSE=$(curl -s -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" $SLACK_WEBHOOK_URL)
@@ -118,6 +122,10 @@ if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
     DISCORD_PAYLOAD="{
         \"content\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: **$COMMIT_AUTHOR**\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
     }"
+
+    # Trim any leading or trailing whitespace from the SLACK_WEBHOOK_URL
+    # This is necessary when the variable is on the first line of the secret.txt file.    
+    DISCORD_WEBHOOK_URL=$(echo "$DISCORD_WEBHOOK_URL" | tr -d '\r' | xargs)
 
     # Send the string to Discord as a payload and capture the HTTP status code
     HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-type: application/json' --data "$DISCORD_PAYLOAD" $DISCORD_WEBHOOK_URL)

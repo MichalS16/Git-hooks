@@ -70,3 +70,15 @@ Author: DavidK
 Date: Tue Oct 15 23:52:03 2024 +0200
 Message: Hooks - post-commit - Edit git-crypt configuration
 
+------------------------------------------------
+Commit hash: 69aabfa015a7256f2806d9404563e3e1e4e38cc9
+Author: DavidK
+Date: Wed Oct 16 00:10:21 2024 +0200
+Message: Hooks - post-commit - Edit Slack notification
+
+------------------------------------------------
+Commit hash: f69d40677644132613dfed9e1a18be93b91b0f9d
+Author: DavidK
+Date: Wed Oct 16 00:34:13 2024 +0200
+Message: Hooks - post-commit - Modify Notifications so variables are more robust to whitespaces
+
