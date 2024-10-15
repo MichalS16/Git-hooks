@@ -1,1 +1,1 @@
-hooks/secrets.txt filter=git-crypt diff=git-crypt
+hooks/secret.txt filter=git-crypt diff=git-crypt

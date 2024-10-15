@@ -74,7 +74,7 @@ echo "Commit log updated and last commit amended."
 echo "Running post-commit notifications..."
 
 #--- URL retrieval ---#
-    FILE_SECRETS="hooks/secrets.txt"
+    FILE_SECRETS="hooks/secret.txt"
 
     # Check if the secrets file exists and is readable
     if [ -f "$FILE_SECRETS" ]; then
