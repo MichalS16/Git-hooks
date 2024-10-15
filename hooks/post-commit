@@ -106,9 +106,9 @@ if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
     if [[ "$RESPONSE" == "ok" ]]; then
         echo "Slack notification sent."
     else
-        echo "Slack notification unsuccessful."
+        echo "Slack notification unsuccessful. Response: $RESPONSE"
     fi
-
+    
 ### Discord
     # Discord webhook URL (generated from Discord/Channel/Integrations/Webhook)
     # Retrieved from the git-crypted secrets.txt file

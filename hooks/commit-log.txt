@@ -65,32 +65,8 @@ Date: Mon Oct 14 01:39:53 2024 +0200
 Message: Hooks - post-commit - Add git-crypt configuration and encrypted key
 
 ------------------------------------------------
-Commit hash: bb018b80ce239f429c1750e9d97895609bdbcde3
+Commit hash: 4f30efbd119e0ea147687ce8255b06f1a49002e5
 Author: DavidK
-Date: Mon Oct 14 02:14:19 2024 +0200
-Message: test encryption now
-
-------------------------------------------------
-Commit hash: 26e922f6d78b172f56de7d5de965a94c88fa1bde
-Author: DavidK
-Date: Mon Oct 14 02:15:41 2024 +0200
-Message: test
-
-------------------------------------------------
-Commit hash: 8adf461a641735aacd679c531b31543d756e6702
-Author: DavidK
-Date: Mon Oct 14 02:20:03 2024 +0200
-Message: tae
-
-------------------------------------------------
-Commit hash: 30cb04e0af069f2c726f5e59627b1f1438296fba
-Author: DavidK
-Date: Mon Oct 14 02:25:46 2024 +0200
-Message: test
-
-------------------------------------------------
-Commit hash: 665fbe81d91be7a45c88a7aa1df5d48f2180af42
-Author: DavidK
-Date: Mon Oct 14 02:27:50 2024 +0200
-Message: traa
+Date: Tue Oct 15 23:52:03 2024 +0200
+Message: Hooks - post-commit - Edit git-crypt configuration
 
