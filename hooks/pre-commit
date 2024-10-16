@@ -1,0 +1,14 @@
+#!/bin/bash
+# A Git pre-commit hook.
+
+
+#######################
+####### Messages ######
+#######################
+
+echo "HOOK - PRE-COMMIT - START:"
+echo "Your commit is about to happen. Running the pre-commit hooks.."
+
+
+# Display the end message
+echo "HOOK - PRE-COMMIT - END"
