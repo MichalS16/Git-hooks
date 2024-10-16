@@ -148,3 +148,15 @@ Author: DavidK
 Date: Thu Oct 17 00:10:38 2024 +0200
 Message: Edit install-hooks.sh - correct an EOF error that was caused by copying CRLF pre-commit into .git/hooks folder and corrupting the currently running pre-commit, clean up other things
 
+------------------------------------------------
+Commit hash: 5b28c82dd58eaae2990699ad7b147ff3cf0fef4b
+Author: DavidK
+Date: Thu Oct 17 00:14:26 2024 +0200
+Message: Edit example.ipynb - documentation
+
+------------------------------------------------
+Commit hash: 43becc147c08d74f15be99b80003efd5db427dc7
+Author: DavidK
+Date: Thu Oct 17 00:18:11 2024 +0200
+Message: Edit example.ipynb - documentation
+

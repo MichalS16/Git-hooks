@@ -74,24 +74,24 @@ echo "Commit log updated and last commit amended."
 echo "Running post-commit notifications..."
 
 #--- URL retrieval ---#
-    FILE_SECRETS="hooks/secret.txt"
+    FILE_SECRET="hooks-accessories/secret.txt"
 
-    # Check if the secrets file exists and is readable
-    if [ -f "$FILE_SECRETS" ]; then
+    # Check if the secret file exists and is readable
+    if [ -f "$FILE_SECRET" ]; then
         # Read the secret URLs from the file
-        source "$FILE_SECRETS"
+        source "$FILE_SECRET"
     else
-        echo "Error: secrets.txt not found or not readable."
+        echo "Error: secret.txt not found or not readable."
         exit 1
     fi
 
-# Webhook URLs retrieved from secrets.txt
+# Webhook URLs retrieved from secret.txt
 if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
     echo "Webhook URLs successfully retrieved."
 
 ### Slack
     # Slack webhook URL (generated from Slack/Apps/Incoming WebHooks)
-    # Retrieved from the git-crypted secrets.txt file
+    # Retrieved from the git-crypted secret.txt file
         # SLACK_WEBHOOK_URL="https://hooks.slack.com/services/your/slack/webhook"
 
     # Create a JSON string
@@ -115,7 +115,7 @@ if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
     
 ### Discord
     # Discord webhook URL (generated from Discord/Channel/Integrations/Webhook)
-    # Retrieved from the git-crypted secrets.txt file
+    # Retrieved from the git-crypted secret.txt file
         # DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/your/discord/webhook"
 
     # Create JSON payload
@@ -138,7 +138,7 @@ if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
     fi
 
 else
-    echo "Error: Webhook URLs not found in secrets.txt."
+    echo "Error: Webhook URLs not found in secret.txt."
 fi
 
 echo "Done sending notifications."
