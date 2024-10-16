@@ -1,0 +1,93 @@
+#!/bin/bash
+# A Git pre-commit hook example.
+
+
+#---------------------#
+#----- Flag check ----#
+#---------------------#
+
+# This check is necessary to not run pre-commit on additional amend commits that happen in the post-commit hook.
+# Check if the commit has already been amended by looking for a flag file.
+FILE_FLAG=".amend-flag"
+
+if [ -f "$FILE_FLAG" ]; then
+    # If the flag file exists, exit to avoid an infinite loop, but don't remove the file, that is done in the post-commit hook
+    echo "Exiting the re-triggered pre-commit hook to avoid loop."
+    exit 0
+fi
+
+
+#######################
+####### Messages ######
+#######################
+
+echo "HOOK - PRE-COMMIT - START:"
+echo "Your commit is about to happen. Running the pre-commit hooks..."
+
+
+#######################
+#### Hooks install ####
+#######################
+
+# Run install-hooks.sh to update Git hooks and adjust line endings
+echo "Running install-hooks.sh to update hooks and adjust their line endings..."
+bash install-hooks.sh
+INSTALL_HOOKS_EXIT_CODE=$?
+if [ $INSTALL_HOOKS_EXIT_CODE -ne 0 ]; then
+  echo "Failed to run install-hooks.sh. Please check the script and try again."
+  echo "Aborting the commit."
+  exit 1
+fi
+
+
+#######################
+##### Code checks #####
+#######################
+
+# Flake8, style guide enforcement
+echo "Running Flake8, a detector of code style issues and programming errors..."
+flake8 . --exclude=.venv # current directory, excluding the python .venv folder
+if [ $? -ne 0 ]; then
+  echo "Code issues detected (according to Flake8). Please fix them before committing."
+  echo "Aborting the commit."
+  exit 1 # stop the commit
+fi
+
+# Pytest, unit tests
+echo "Running Pytest, unit tests in the repo..."
+pytest
+PYTEST_EXIT_CODE=$?
+if [ $PYTEST_EXIT_CODE -eq 0 ]; then
+  echo "Pytest completed successfully."
+elif [ $PYTEST_EXIT_CODE -eq 5 ]; then
+  echo "No Pytest test was found. Proceeding with the commit."
+else
+  echo "Pytest unit tests failed with exit code $PYTEST_EXIT_CODE. Please fix the issues before committing."
+  echo "Aborting the commit."
+  exit 1
+fi
+
+# Code coverage check
+echo "Checking code coverage of Pytest..."
+coverage run -m pytest # the --no-data-file is somehow buggy for us, so omitted, and removing the report manually later
+COVERAGE_EXIT_CODE=$?
+
+if [ $COVERAGE_EXIT_CODE -eq 0 ]; then
+  echo "Coverage check completed successfully."
+elif [ $COVERAGE_EXIT_CODE -eq 5 ]; then
+  echo "No data was collected. Proceeding with the commit."
+else
+  echo "Coverage check failed with exit code $COVERAGE_EXIT_CODE. Please ensure sufficient coverage before committing."
+  echo "Aborting the commit."
+  exit 1
+fi
+
+# Clean up: Remove the .coverage file if it exists
+if [ -f ".coverage" ]; then
+  rm .coverage
+  echo ".coverage file removed after coverage check."
+fi
+
+
+# Display the end message
+echo "HOOK - PRE-COMMIT - END"
