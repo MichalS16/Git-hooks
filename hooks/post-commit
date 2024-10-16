@@ -34,7 +34,7 @@ echo "Your commit succeeded. This is a message from IES squad."
 echo "Logging commit details..."
 
 # Log file location
-FILE_LOG="hooks/commit-log.txt"
+FILE_LOG="hooks-accessories/commit-log.txt"
 
 # Prepare the commit details
 COMMIT_HASH=$(git log -1 --pretty=format:"%H")

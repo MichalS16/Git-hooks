@@ -106,3 +106,45 @@ Author: DavidK
 Date: Wed Oct 16 23:21:18 2024 +0200
 Message: Edit pre-commit - remove a debugging line
 
+------------------------------------------------
+Commit hash: 96b91b0606b0365103a845fb02365cddb3cae381
+Author: DavidK
+Date: Wed Oct 16 23:30:26 2024 +0200
+Message: Edit example.ipynb - documentation, redo code cell formatting into markdown and bash tags
+
+------------------------------------------------
+Commit hash: 1ef87594fc469780e4ecbd4435e0de9c64df3c01
+Author: DavidK
+Date: Wed Oct 16 23:35:27 2024 +0200
+Message: Edit example.ipynb - documentation, redo code cell formatting into markdown and bash tags
+
+------------------------------------------------
+Commit hash: 70c77f51a62f8c2341385ecc87e57271d0635104
+Author: DavidK
+Date: Wed Oct 16 23:37:57 2024 +0200
+Message: Edit example.ipynb - documentation, redo code cell formatting into markdown and bash tags
+
+------------------------------------------------
+Commit hash: d3d4f49e5f17204854f2b9ab789884ef32296e4f
+Author: DavidK
+Date: Wed Oct 16 23:57:18 2024 +0200
+Message: Edit install-hooks.sh - correct an EOF error
+
+------------------------------------------------
+Commit hash: 993d8cdf511f9e54b7d33c605962683f7adc1f8f
+Author: DavidK
+Date: Thu Oct 17 00:07:58 2024 +0200
+Message: Edit install-hooks.sh - correct an EOF error that was caused by copying CRLF pre-commit into .git/hooks folder and corrupting the currently running pre-commit
+
+------------------------------------------------
+Commit hash: 549cf4e2f89a6749ae6418744d537fd0dbac0176
+Author: DavidK
+Date: Thu Oct 17 00:08:59 2024 +0200
+Message: Edit install-hooks.sh - correct an EOF error that was caused by copying CRLF pre-commit into .git/hooks folder and corrupting the currently running pre-commit
+
+------------------------------------------------
+Commit hash: ed569e072cb86e3b58309eb1682c5753944ca80c
+Author: DavidK
+Date: Thu Oct 17 00:10:38 2024 +0200
+Message: Edit install-hooks.sh - correct an EOF error that was caused by copying CRLF pre-commit into .git/hooks folder and corrupting the currently running pre-commit, clean up other things
+
