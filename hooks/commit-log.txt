@@ -88,3 +88,9 @@ Author: DavidK
 Date: Wed Oct 16 01:04:22 2024 +0200
 Message: Hooks - post-commit - Modify secret.txt, removed old leaked URLs, regenerated new encrypted
 
+------------------------------------------------
+Commit hash: 9be79a022222fd34b5d110309f2611daa1a33591
+Author: DavidK
+Date: Wed Oct 16 12:09:36 2024 +0200
+Message: Hooks - post-commit - Edit example.ipynb, Installing the hooks and the line endings issues, and updated the post-commit hook bash code used in the script
+
