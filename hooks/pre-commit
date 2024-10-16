@@ -1,6 +1,6 @@
 #!/bin/bash
 # A Git pre-commit hook example.
-
+set -x
 
 #---------------------#
 #----- Flag check ----#
@@ -48,7 +48,7 @@ fi
 echo "Running Flake8, a detector of code style issues and programming errors..."
 flake8 . --exclude=.venv # current directory, excluding the python .venv folder
 if [ $? -ne 0 ]; then
-  echo "Code issues detected (according to Flake8). Please fix them before committing."
+  echo "Code issues detected according to Flake8. Please fix them before committing."
   echo "Aborting the commit."
   exit 1 # stop the commit
 fi

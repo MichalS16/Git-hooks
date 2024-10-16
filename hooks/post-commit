@@ -1,0 +1,157 @@
+#!/bin/bash
+# A Git post-commit hook that displays messages and additional information.
+
+
+#---------------------#
+#----- Flag check ----#
+#---------------------#
+
+# This check is necessary for our Logging part of code, where we amend the commit.
+# Without this flag check, the post-commit hook would enter an infinite loop.
+# Check if the commit has already been amended by looking for a flag file.
+FILE_FLAG=".amend-flag"
+
+if [ -f "$FILE_FLAG" ]; then
+    # If the flag file exists, remove it and exit to avoid an infinite loop
+    rm -f "$FILE_FLAG"
+    echo "Exiting the re-triggered hook to avoid loop."
+    exit 0
+fi
+
+
+#######################
+####### Messages ######
+#######################
+
+echo "HOOK - POST-COMMIT - START:"
+echo "Your commit succeeded. This is a message from IES squad."
+
+
+#######################
+####### Logging #######
+#######################
+
+echo "Logging commit details..."
+
+# Log file location
+FILE_LOG="hooks/commit-log.txt"
+
+# Prepare the commit details
+COMMIT_HASH=$(git log -1 --pretty=format:"%H")
+COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
+COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
+COMMIT_DATE=$(git log -1 --pretty=format:"%ad")
+
+# Append info to the log file
+echo "------------------------------------------------" >> $FILE_LOG
+echo "Commit hash: $COMMIT_HASH" >> $FILE_LOG
+echo "Author: $COMMIT_AUTHOR" >> $FILE_LOG
+echo "Date: $COMMIT_DATE" >> $FILE_LOG
+echo "Message: $COMMIT_MESSAGE" >> $FILE_LOG
+echo "" >> $FILE_LOG
+
+echo "Done appending commit details to $FILE_LOG."
+
+# Stage the log file so it gets included in the commit
+git add $FILE_LOG
+
+# Create the flag file to prevent re-triggering the hook
+touch "$FILE_FLAG"
+
+# Amend the last commit to include the updated log file, without changing the commit message
+git commit --amend --no-edit
+
+# Remove the flag file after the commit is amended
+rm -f "$FLAG_FILE"
+
+echo "Commit log updated and last commit amended."
+
+
+#######################
+#### Notifications ####
+#######################
+
+echo "Running post-commit notifications..."
+
+#--- URL retrieval ---#
+    FILE_SECRETS="hooks/secret.txt"
+
+    # Check if the secrets file exists and is readable
+    if [ -f "$FILE_SECRETS" ]; then
+        # Read the secret URLs from the file
+        source "$FILE_SECRETS"
+    else
+        echo "Error: secrets.txt not found or not readable."
+        exit 1
+    fi
+
+# Webhook URLs retrieved from secrets.txt
+if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
+    echo "Webhook URLs successfully retrieved."
+
+### Slack
+    # Slack webhook URL (generated from Slack/Apps/Incoming WebHooks)
+    # Retrieved from the git-crypted secrets.txt file
+        # SLACK_WEBHOOK_URL="https://hooks.slack.com/services/your/slack/webhook"
+
+    # Create a JSON string
+    SLACK_PAYLOAD="{
+        \"text\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: *$COMMIT_AUTHOR*\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
+    }"
+    
+    # Trim any leading or trailing whitespace from the SLACK_WEBHOOK_URL.
+    # This is necessary when the variable is on the first line of the secret.txt file.
+    SLACK_WEBHOOK_URL=$(echo "$SLACK_WEBHOOK_URL" | tr -d '\r' | xargs)
+
+    # Send the string to Slack as a payload and capture the response
+    RESPONSE=$(curl -s -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" $SLACK_WEBHOOK_URL)
+
+    # Check if the response from Slack contains "ok"
+    if [[ "$RESPONSE" == "ok" ]]; then
+        echo "Slack notification sent."
+    else
+        echo "Slack notification unsuccessful. Response: $RESPONSE"
+    fi
+    
+### Discord
+    # Discord webhook URL (generated from Discord/Channel/Integrations/Webhook)
+    # Retrieved from the git-crypted secrets.txt file
+        # DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/your/discord/webhook"
+
+    # Create JSON payload
+    DISCORD_PAYLOAD="{
+        \"content\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: **$COMMIT_AUTHOR**\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
+    }"
+
+    # Trim any leading or trailing whitespace from the SLACK_WEBHOOK_URL
+    # This is necessary when the variable is on the first line of the secret.txt file.    
+    DISCORD_WEBHOOK_URL=$(echo "$DISCORD_WEBHOOK_URL" | tr -d '\r' | xargs)
+
+    # Send the string to Discord as a payload and capture the HTTP status code
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-type: application/json' --data "$DISCORD_PAYLOAD" $DISCORD_WEBHOOK_URL)
+
+    # Check if the status code is 2xx (success)
+    if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
+        echo "Discord notification sent."
+    else
+        echo "Discord notification unsuccessful. Status code: $HTTP_STATUS"
+    fi
+
+else
+    echo "Error: Webhook URLs not found in secrets.txt."
+fi
+
+echo "Done sending notifications."
+
+
+#######################
+######## Push #########
+#######################
+
+# Note: careful with this, more dangerous. Tested, works, but commenting it out for safer practices.
+# Optionally, can automatically push the commit to the remote repository.
+    # git push --force-with-lease origin $(git branch --show-current)
+
+
+# Display the end message
+echo "HOOK - POST-COMMIT - END"

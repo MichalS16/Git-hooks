@@ -1,0 +1,102 @@
+------------------------------------------------
+Commit hash: fdb9b293044fb8753242ceacd35330af693b0de7
+Author: DavidK
+Date: Sun Oct 13 15:05:46 2024 +0200
+Message: Hooks - post-commit - add logging code
+
+------------------------------------------------
+Commit hash: ff522bef6d6181f80e35ccb13fd7c7668c190f1d
+Author: DavidK
+Date: Sun Oct 13 20:58:43 2024 +0200
+Message: Hooks - post-commit - improve logging code to amend the commit with the log file
+
+------------------------------------------------
+Commit hash: 6b5b758af699a8ad6131855c32e22375318a3995
+Author: DavidK
+Date: Sun Oct 13 21:06:40 2024 +0200
+Message: Hooks - post-commit - add an automatic push code
+
+------------------------------------------------
+Commit hash: 1832df72187d9d8f3e2ef7d063e3fd71ed490d4d
+Author: DavidK
+Date: Sun Oct 13 21:14:41 2024 +0200
+Message: Hooks - post-commit - comment out the Push code for safety purposes
+
+------------------------------------------------
+Commit hash: 0674081b1fd25c03e81ff791620d2e9b2930a964
+Author: DavidK
+Date: Sun Oct 13 21:20:14 2024 +0200
+Message: Hooks - post-commit - add Notifications to Slack and edit documentation
+
+------------------------------------------------
+Commit hash: 5113eed4b8ec2dc4ac5ba70a669371971fa97417
+Author: DavidK
+Date: Sun Oct 13 21:25:36 2024 +0200
+Message: Hooks - post-commit - improve Notifications to Slack
+
+------------------------------------------------
+Commit hash: 433b8699605ee16804faf974ad68b5d8b5e11e8f
+Author: DavidK
+Date: Sun Oct 13 22:46:31 2024 +0200
+Message: Hooks - post-commit - add Notification to Discord
+
+------------------------------------------------
+Commit hash: 74109ce07f5443c9664ad8a2772a72d33ae0856b
+Author: DavidK
+Date: Sun Oct 13 23:17:51 2024 +0200
+Message: Hooks - post-commit - create a secrets.txt file with webhook URLs (to be encrypted)
+
+------------------------------------------------
+Commit hash: 2b0f299549dd3a0393a8a2faa83b9aaade415db8
+Author: DavidK
+Date: Sun Oct 13 23:19:46 2024 +0200
+Message: Hooks - post-commit - retrieve webhook URLs from secrets.txt (to be encrypted)
+
+------------------------------------------------
+Commit hash: ca4bc0873c9ae4a3e063d72842653c2857ad99b5
+Author: DavidK
+Date: Sun Oct 13 23:25:56 2024 +0200
+Message: Hooks - post-commit - added quotes to URLs in secrets.txt, a testing commit
+
+------------------------------------------------
+Commit hash: d9574736509b1a49d2b30230e12c351c6373144e
+Author: DavidK
+Date: Mon Oct 14 01:39:53 2024 +0200
+Message: Hooks - post-commit - Add git-crypt configuration and encrypted key
+
+------------------------------------------------
+Commit hash: 4f30efbd119e0ea147687ce8255b06f1a49002e5
+Author: DavidK
+Date: Tue Oct 15 23:52:03 2024 +0200
+Message: Hooks - post-commit - Edit git-crypt configuration
+
+------------------------------------------------
+Commit hash: 69aabfa015a7256f2806d9404563e3e1e4e38cc9
+Author: DavidK
+Date: Wed Oct 16 00:10:21 2024 +0200
+Message: Hooks - post-commit - Edit Slack notification
+
+------------------------------------------------
+Commit hash: f69d40677644132613dfed9e1a18be93b91b0f9d
+Author: DavidK
+Date: Wed Oct 16 00:34:13 2024 +0200
+Message: Hooks - post-commit - Modify Notifications so variables are more robust to whitespaces
+
+------------------------------------------------
+Commit hash: 12c5c8c6cd5648bf44f77445621ae8e0a883f7f1
+Author: DavidK
+Date: Wed Oct 16 01:04:22 2024 +0200
+Message: Hooks - post-commit - Modify secret.txt, removed old leaked URLs, regenerated new encrypted
+
+------------------------------------------------
+Commit hash: 9be79a022222fd34b5d110309f2611daa1a33591
+Author: DavidK
+Date: Wed Oct 16 12:09:36 2024 +0200
+Message: Hooks - post-commit - Edit example.ipynb, Installing the hooks and the line endings issues, and updated the post-commit hook bash code used in the script
+
+------------------------------------------------
+Commit hash: 64ea4dadfcd552488a7396ea0691bbb0d3fff17e
+Author: DavidK
+Date: Wed Oct 16 23:20:18 2024 +0200
+Message: Merge branch 'post-commit' into hooks-examples
+
