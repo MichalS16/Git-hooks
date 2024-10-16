@@ -1,5 +1,5 @@
 #!/bin/bash
-# A Git pre-commit hook.
+# A Git pre-commit hook example.
 
 
 #######################
@@ -7,7 +7,51 @@
 #######################
 
 echo "HOOK - PRE-COMMIT - START:"
-echo "Your commit is about to happen. Running the pre-commit hooks.."
+echo "Your commit is about to happen. Running the pre-commit hooks..."
+
+
+#######################
+##### Code checks #####
+#######################
+
+# Flake8, style guide enforcement
+echo "Running Flake8, a detector of code style issues and programming errors..."
+flake8 . --exclude=.venv # current directory, excluding the python .venv folder
+if [ $? -ne 0 ]; then
+  echo "Code issues detected (according to Flake8). Please fix them before committing."
+  echo "Aborting the commit."
+  exit 1 # stop the commit
+fi
+
+# Pytest, unit tests
+echo "Running Pytest, unit tests in the repo..."
+pytest
+PYTEST_EXIT_CODE=$?
+if [ $PYTEST_EXIT_CODE -eq 0 ]; then
+  echo "Pytest completed successfully."
+elif [ $PYTEST_EXIT_CODE -eq 5 ]; then
+  echo "No Pytest was found. Proceeding with the commit."
+else
+  echo "Pytest unit tests failed with exit code $PYTEST_EXIT_CODE. Please fix the issues before committing."
+  echo "Aborting the commit."
+  exit 1
+fi
+
+# Code coverage check
+echo "Checking code coverage of Pytest..."
+coverage run -m pytest
+# coverage report # optional
+COVERAGE_EXIT_CODE=$?
+
+if [ $COVERAGE_EXIT_CODE -eq 0 ]; then
+  echo "Coverage check completed successfully."
+elif [ $COVERAGE_EXIT_CODE -eq 5 ]; then
+  echo "No data was collected. Proceeding with the commit."
+else
+  echo "Coverage check failed with exit code $COVERAGE_EXIT_CODE. Please ensure sufficient coverage before committing."
+  echo "Aborting the commit."
+  exit 1
+fi
 
 
 # Display the end message
