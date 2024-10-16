@@ -100,3 +100,9 @@ Author: DavidK
 Date: Wed Oct 16 23:20:18 2024 +0200
 Message: Merge branch 'post-commit' into hooks-examples
 
+------------------------------------------------
+Commit hash: ab6880269c98f6e9663a7023157ecdf31d5a79fa
+Author: DavidK
+Date: Wed Oct 16 23:21:18 2024 +0200
+Message: Edit pre-commit - remove a debugging line
+
