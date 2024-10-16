@@ -11,6 +11,21 @@ echo "Your commit is about to happen. Running the pre-commit hooks..."
 
 
 #######################
+#### Hooks install ####
+#######################
+
+# Run install-hooks.sh to update Git hooks before every commit
+echo "Running install-hooks.sh to update hooks..."
+bash install-hooks.sh
+INSTALL_HOOKS_EXIT_CODE=$?
+if [ $INSTALL_HOOKS_EXIT_CODE -ne 0 ]; then
+  echo "Failed to run install-hooks.sh. Please check the script and try again."
+  echo "Aborting the commit."
+  exit 1
+fi
+
+
+#######################
 ##### Code checks #####
 #######################
 
