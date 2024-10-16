@@ -14,8 +14,8 @@ echo "Your commit is about to happen. Running the pre-commit hooks..."
 #### Hooks install ####
 #######################
 
-# Run install-hooks.sh to update Git hooks before every commit
-echo "Running install-hooks.sh to update hooks..."
+# Run install-hooks.sh to update Git hooks and adjust line endings
+echo "Running install-hooks.sh to update hooks and adjust their line endings..."
 bash install-hooks.sh
 INSTALL_HOOKS_EXIT_CODE=$?
 if [ $INSTALL_HOOKS_EXIT_CODE -ne 0 ]; then
@@ -45,7 +45,7 @@ PYTEST_EXIT_CODE=$?
 if [ $PYTEST_EXIT_CODE -eq 0 ]; then
   echo "Pytest completed successfully."
 elif [ $PYTEST_EXIT_CODE -eq 5 ]; then
-  echo "No Pytest was found. Proceeding with the commit."
+  echo "No Pytest test was found. Proceeding with the commit."
 else
   echo "Pytest unit tests failed with exit code $PYTEST_EXIT_CODE. Please fix the issues before committing."
   echo "Aborting the commit."
@@ -54,8 +54,7 @@ fi
 
 # Code coverage check
 echo "Checking code coverage of Pytest..."
-coverage run -m pytest
-# coverage report # optional
+coverage run -m pytest # the --no-data-file is somehow buggy for us, so omitted, and removing the report manually later
 COVERAGE_EXIT_CODE=$?
 
 if [ $COVERAGE_EXIT_CODE -eq 0 ]; then
@@ -66,6 +65,12 @@ else
   echo "Coverage check failed with exit code $COVERAGE_EXIT_CODE. Please ensure sufficient coverage before committing."
   echo "Aborting the commit."
   exit 1
+fi
+
+# Clean up: Remove the .coverage file if it exists
+if [ -f ".coverage" ]; then
+  rm .coverage
+  echo ".coverage file removed after coverage check."
 fi
 
 
