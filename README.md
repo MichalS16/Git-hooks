@@ -21,3 +21,7 @@ The general theory about **Git Hooks** is in:
 
 The demonstration of setting up **Git Hooks** is in:
 [Examples](https://github.com/MichalS16/Git-hooks/blob/main/examples.ipynb)
+
+Our pre-commit and post-commit hook scripts are implemented in this repo and output the following actions in the terminal when making a commit:
+
+![Hooks live run output](./hooks-accessories/Hooks_live_run.JPG "Hooks live run output")

@@ -208,3 +208,9 @@ Author: DavidK
 Date: Thu Oct 17 22:46:33 2024 +0200
 Message: Documentation - edit Installation description, add our live output picture
 
+------------------------------------------------
+Commit hash: 8cfeacdae6c947adaffccb9ae51ca5daf94222f5
+Author: DavidK
+Date: Thu Oct 17 22:58:58 2024 +0200
+Message: Documentation - edit post-commit hook, add pictures with log and notifications
+
