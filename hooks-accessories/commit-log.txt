@@ -172,3 +172,15 @@ Author: DavidK
 Date: Thu Oct 17 20:56:35 2024 +0200
 Message: Documentation - cosmetic edits
 
+------------------------------------------------
+Commit hash: 60d7f9d8d84dae02a980271832c9ad94bcabdf5b
+Author: DavidK
+Date: Thu Oct 17 21:17:33 2024 +0200
+Message: Organisation of files to folders, updated paths to the install-hooks.sh in scripts.
+
+------------------------------------------------
+Commit hash: 7990ba1de2d265761d6690bdc0c116380ab15ef3
+Author: DavidK
+Date: Thu Oct 17 21:18:16 2024 +0200
+Message: Organisation of files to folders, updated paths to the install-hooks.sh in scripts.
+

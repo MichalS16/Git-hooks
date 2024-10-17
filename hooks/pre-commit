@@ -31,8 +31,8 @@ echo "Your commit is about to happen. Running the pre-commit hooks..."
 
 # Run install-hooks.sh to update Git hooks and adjust line endings
 echo "Running install-hooks.sh to update hooks and adjust their line endings..."
-# If the following doesn't run, do a dos2unix install-hooks.sh manually for Unix-systems
-bash install-hooks.sh
+# If the following doesn't run, do a "dos2unix hooks-accessories/install-hooks.sh" manually in terminal for Unix-systems
+bash hooks-accessories/install-hooks.sh
 INSTALL_HOOKS_EXIT_CODE=$?
 if [ $INSTALL_HOOKS_EXIT_CODE -ne 0 ]; then
   echo "Failed to run install-hooks.sh. Please check the script and try again."

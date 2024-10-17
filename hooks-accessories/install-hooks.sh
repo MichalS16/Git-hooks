@@ -2,7 +2,7 @@
 
 # This script copies hooks from the 'hooks/' folder to the '.git/hooks/' folder
 # and adjusts line endings based on the detected OS environment.
-# Can run this script manually: bash install-hooks.sh
+# Can run this script manually: bash hooks-accessories/install-hooks.sh
 
 # Function to detect OS and convert line endings
 function convert_line_endings() {
