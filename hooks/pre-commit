@@ -1,5 +1,6 @@
 #!/bin/bash
 # A Git pre-commit hook example.
+# This is a live working script, implemented in the repo.
 
 
 #---------------------#

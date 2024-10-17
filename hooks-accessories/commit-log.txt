@@ -184,3 +184,9 @@ Author: DavidK
 Date: Thu Oct 17 21:18:16 2024 +0200
 Message: Organisation of files to folders, updated paths to the install-hooks.sh in scripts.
 
+------------------------------------------------
+Commit hash: dd757efa8eec76d61cb3c9de28efcb1b39f3655e
+Author: DavidK
+Date: Thu Oct 17 22:02:21 2024 +0200
+Message: Documentation - hook examples formatting
+

@@ -1,5 +1,6 @@
 #!/bin/bash
 # A Git post-commit hook that displays messages and additional information.
+# This is a live working script, implemented in the repo.
 
 
 #---------------------#
