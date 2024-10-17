@@ -4,7 +4,7 @@
 
 **Git hooks** are powerful scripts that allow you to automate tasks and enforce policies at key points during the Git workflow. These scripts are triggered by specific Git actions such as making a commit, pushing changes, or merging branches. By leveraging Git hooks, developers can enhance productivity by automating tasks such as running tests, checking for code quality, or verifying commit messages, ensuring the repository maintains a high standard of code quality and consistency.
 
-Git hooks can be used both locally (on your machine) and on the server-side (on the Git server), offering flexibility in how they are implemented. They help to enforce coding standards, run scripts before or after certain Git operations, and even enable integration with external systems such as continuous integration or deployment pipelines.
+Git hooks can be used both locally and on the server-side (on the Git server), offering flexibility in how they are implemented. They help to enforce coding standards, run scripts before or after certain Git operations, and even enable integration with external systems such as continuous integration or deployment pipelines.
 
 For teams working collaboratively, Git hooks act as a safeguard, preventing bad code from being pushed into the shared repository by automating checks and balances. This ensures that only validated, formatted, and properly documented code makes it into the shared codebase, saving time and effort in code reviews or debugging later on.
 
@@ -16,7 +16,7 @@ By using Git hooks, developers can automate a wide range of tasks that are often
 
 - **Enforce Standards**: By running scripts during commits or pushes, you can enforce coding standards and prevent poorly formatted or untested code from being pushed to the repository.
 
-- **Trigger External Actions**: Hooks can trigger CI/CD pipelines, send notifications, or deploy code automatically after a successful push.
+- **Trigger External Actions**: Hooks can trigger continuous integration and continuous deployment (CI/CD) pipelines, send notifications, or deploy code automatically after a successful push.
 
 ## Types of Git Hooks
 
@@ -32,7 +32,7 @@ Each type of hook plays a crucial role in enhancing workflow efficiency and main
 
 Client-side hooks are triggered by actions performed by developers in their local environment, such as committing code or merging branches. These hooks are essential for catching issues early, ensuring code quality before changes are pushed to the central repository. Key examples include:
 
-- **pre-commit**: Executes before a commit is finalized, allowing you to run linters, format code, and perform checks. This ensures that only code meeting your standards is committed.
+- **pre-commit**: Executes before a commit is finalized, allowing you to run linters, format code, or perform checks. This ensures that only code meeting your standards is committed.
 
 - **prepare-commit-msg**: Provides an opportunity to auto-populate or modify commit messages before they are saved. This can enforce message formatting or include relevant issue keys automatically.
 
@@ -48,7 +48,7 @@ Server-side hooks are triggered on the Git server and play a crucial role in col
 
 - **post-receive**: Runs immediately after changes are pushed to the repository. This hook is commonly used to trigger continuous integration (CI) pipelines or deployment scripts, automating the process of building, testing, and deploying code to production environments.
 
-For further reading on the different types of Git hooks and their applications, you can refer to the following sources which the text referring:
+For further reading on the different types of Git hooks and their applications, you can refer to the following sources:
 
 - [Git Hooks Documentation](https://git-scm.com/docs/githooks)
 

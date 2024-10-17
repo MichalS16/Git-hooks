@@ -5,7 +5,7 @@
 
 ## 🔎 About
 
-This repository is a project part of **JEM224 - Version control with Git** on IES. The purpose of this repository is to get a closer look at the **Git-hooks** with some general theory and with a demonstration of the use.
+This repository is a project from the IES course **JEM224 - Version control with Git**. The purpose of this repository is to get a closer look at **Git Hooks** with some general theory and a demonstration of their use.
 
 ## 👥 Authors [![Contributors](https://img.shields.io/github/contributors/MichalS16/Git-hooks)](https://github.com/MichalS16/Git-hooks/graphs/contributors)
 
@@ -16,8 +16,8 @@ The contributors to this project are:
 
 ## :books: Content ![GitHub repo size](https://img.shields.io/github/repo-size/MichalS16/Git-hooks)
 
-The general theory about **Git-hooks** you can find in:
+The general theory about **Git Hooks** is in:
 [Theory](https://github.com/MichalS16/Git-hooks/blob/main/theory.md)
 
-The demonstration of setting a **Git-hooks** you can find in:
-[Git-hooks examples](https://github.com/MichalS16/Git-hooks/blob/main/example.ipynb)
+The demonstration of setting up **Git Hooks** is in:
+[Examples](https://github.com/MichalS16/Git-hooks/blob/main/examples.ipynb)

@@ -166,3 +166,9 @@ Author: DavidK
 Date: Thu Oct 17 17:07:29 2024 +0200
 Message: Edit line endings comment for Unix-systems
 
+------------------------------------------------
+Commit hash: 128faaf8a7559dc91027eabe5701f6cbd163bdfb
+Author: DavidK
+Date: Thu Oct 17 20:56:35 2024 +0200
+Message: Documentation - cosmetic edits
+
