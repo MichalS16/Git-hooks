@@ -160,3 +160,9 @@ Author: DavidK
 Date: Thu Oct 17 00:18:11 2024 +0200
 Message: Edit example.ipynb - documentation
 
+------------------------------------------------
+Commit hash: 4f07bdfc38e359430e2337ce73891973de3c8dd2
+Author: DavidK
+Date: Thu Oct 17 17:07:29 2024 +0200
+Message: Edit line endings comment for Unix-systems
+
