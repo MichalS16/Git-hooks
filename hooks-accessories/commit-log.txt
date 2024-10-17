@@ -196,3 +196,9 @@ Author: DavidK
 Date: Thu Oct 17 22:11:48 2024 +0200
 Message: Documentation - post-commit hook formatting
 
+------------------------------------------------
+Commit hash: 83f44a9e840bdc084ac0f21a3b47927f48f3f5dc
+Author: DavidK
+Date: Thu Oct 17 22:39:39 2024 +0200
+Message: Documentation - edit Installation description
+
