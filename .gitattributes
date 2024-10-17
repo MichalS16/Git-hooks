@@ -1,1 +1,2 @@
+# Set the git-crypt filter for all files
 hooks-accessories/secret.txt filter=git-crypt diff=git-crypt
