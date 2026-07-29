@@ -1,0 +1,50 @@
+#!/bin/bash
+# A Git post-receive server-side hook example.
+#
+# Belongs in the bare repository on the Git server (see the note in
+# pre-receive for why server-side hooks live there, not in a client's
+# .git/hooks/). Runs once per push, after all refs have already been
+# updated - too late to reject anything (that's pre-receive's job), so
+# this is for side effects: notifying other systems, or, as here,
+# triggering a deployment.
+#
+# Differs from post-update (the other "after the push" server-side
+# hook) in granularity: Git invokes post-receive once for the whole
+# push, fed every updated ref on stdin as "<old sha1> <new sha1> <ref
+# name>" lines - the same shape pre-receive gets - rather than once per
+# ref as separate arguments.
+
+set -uo pipefail
+
+echo "HOOK - POST-RECEIVE (server-side) - START:"
+
+# A common real-world use: deploy the latest code to a checked-out
+# working tree whenever main/master gets a new commit (e.g. a simple
+# self-hosted deploy setup without a separate CI/CD pipeline).
+WORK_TREE="${DEPLOY_WORK_TREE:-/var/www/app}"
+
+DEPLOY_FAILED=0
+while read -r OLD_SHA NEW_SHA REF_NAME; do
+  BRANCH_NAME="${REF_NAME#refs/heads/}"
+
+  # A single push can update several refs at once; a deploy failure on
+  # one must not stop the rest of the push's refs (e.g. other branches,
+  # tags) from being processed, so failures are recorded and reported
+  # after the loop rather than aborting it immediately.
+  if [[ "$BRANCH_NAME" =~ ^(main|master)$ ]]; then
+    echo "Deploying $BRANCH_NAME ($NEW_SHA) to $WORK_TREE..."
+    if GIT_WORK_TREE="$WORK_TREE" git checkout -f "$BRANCH_NAME"; then
+      echo "Deployment successful: latest code checked out to $WORK_TREE."
+    else
+      echo "Error: deployment checkout failed for $BRANCH_NAME."
+      DEPLOY_FAILED=1
+    fi
+  fi
+done
+
+if [ "$DEPLOY_FAILED" -ne 0 ]; then
+  echo "One or more deployments failed; see above."
+  exit 1
+fi
+
+echo "HOOK - POST-RECEIVE (server-side) - END"

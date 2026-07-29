@@ -1,76 +1,77 @@
 #!/bin/bash
 # A Git post-commit hook that displays messages and additional information.
 # This is a live working script, implemented in the repo.
+#
+# set -uo pipefail: fail fast on unset variables and on failures inside
+# pipelines, without set -e (some steps here, like the notification curl
+# calls, intentionally check exit/status codes themselves and continue).
+set -uo pipefail
+#
+# NOTE: commit metadata (hash, message, author, date) is logged here, after
+# the commit exists, into hooks-accessories/commit-log.txt. This log entry
+# is picked up and staged by the *next* pre-commit run rather than being
+# folded into the commit that just happened. We deliberately do not amend
+# the just-created commit from here: rewriting a commit's hash right after
+# creating it is fragile (breaks anything that captured the old hash, e.g.
+# a CI trigger or a pushed ref) and is not how production hooks are set up.
+# See README "Security Considerations" for details on why this differs
+# from our original submission.
+#
+# --- Original self-amending variant (kept here for reference only) ---
+# FILE_FLAG=".amend-flag"
+# if [ -f "$FILE_FLAG" ]; then
+#     rm -f "$FILE_FLAG"
+#     echo "Exiting the re-triggered hook to avoid loop."
+#     exit 0
+# fi
+# git add "$FILE_LOG"
+# touch "$FILE_FLAG"
+# git commit --amend --no-edit
+# rm -f "$FILE_FLAG"
+# -----------------------------------------------------------------------
 
 
-#---------------------#
-#----- Flag check ----#
-#---------------------#
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
 
-# This check is necessary for our Logging part of code, where we amend the commit.
-# Without this flag check, the post-commit hook would enter an infinite loop.
-# Check if the commit has already been amended by looking for a flag file.
-FILE_FLAG=".amend-flag"
-
-if [ -f "$FILE_FLAG" ]; then
-    # If the flag file exists, remove it and exit to avoid an infinite loop
-    rm -f "$FILE_FLAG"
-    echo "Exiting the re-triggered hook to avoid loop."
-    exit 0
-fi
-
-
-#######################
-####### Messages ######
-#######################
-
-echo "HOOK - POST-COMMIT - START:"
+hook_start "POST-COMMIT"
 echo "Your commit succeeded. This is a message from IES squad."
 
-
-#######################
-####### Logging #######
-#######################
 
 echo "Logging commit details..."
 
 # Log file location
 FILE_LOG="hooks-accessories/commit-log.txt"
 
-# Prepare the commit details
-COMMIT_HASH=$(git log -1 --pretty=format:"%H")
-COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
-COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
-COMMIT_DATE=$(git log -1 --pretty=format:"%ad")
+# Prepare the commit details in a single git log call instead of one call
+# per field (%x1f is the ASCII unit separator, safe against commit messages
+# containing any other punctuation).
+IFS=$'\x1f' read -r COMMIT_HASH COMMIT_AUTHOR COMMIT_DATE COMMIT_MESSAGE \
+  < <(git log -1 --pretty=format:"%H%x1f%an%x1f%ad%x1f%s")
 
-# Append info to the log file
-echo "------------------------------------------------" >> $FILE_LOG
-echo "Commit hash: $COMMIT_HASH" >> $FILE_LOG
-echo "Author: $COMMIT_AUTHOR" >> $FILE_LOG
-echo "Date: $COMMIT_DATE" >> $FILE_LOG
-echo "Message: $COMMIT_MESSAGE" >> $FILE_LOG
-echo "" >> $FILE_LOG
+# Append info to the log file. This entry will be picked up and staged by
+# the next pre-commit run, not folded into the current commit.
+echo "------------------------------------------------" >> "$FILE_LOG"
+echo "Commit hash: $COMMIT_HASH" >> "$FILE_LOG"
+echo "Author: $COMMIT_AUTHOR" >> "$FILE_LOG"
+echo "Date: $COMMIT_DATE" >> "$FILE_LOG"
+echo "Message: $COMMIT_MESSAGE" >> "$FILE_LOG"
+echo "" >> "$FILE_LOG"
 
 echo "Done appending commit details to $FILE_LOG."
 
-# Stage the log file so it gets included in the commit
-git add $FILE_LOG
 
-# Create the flag file to prevent re-triggering the hook
-touch "$FILE_FLAG"
+# Send Slack/Discord notifications about the commit. Set to "true" to
+# actually send them; kept "false" here so this section acts as a
+# demonstration only and never fires against a real webhook (e.g. when
+# the repo is shared or forked).
+NOTIFICATIONS_ENABLED=false
 
-# Amend the last commit to include the updated log file, without changing the commit message
-git commit --amend --no-edit
-
-# Remove the flag file after the commit is amended
-rm -f "$FLAG_FILE"
-
-echo "Commit log updated and last commit amended."
-
-
-#######################
-#### Notifications ####
-#######################
+if [ "$NOTIFICATIONS_ENABLED" != "true" ]; then
+    echo "Notifications are disabled (NOTIFICATIONS_ENABLED=false). Skipping Slack/Discord notifications."
+elif ! command -v curl >/dev/null 2>&1; then
+    echo "Error: 'curl' is not installed or not on PATH. Skipping Slack/Discord notifications."
+else
 
 echo "Running post-commit notifications..."
 
@@ -86,9 +87,18 @@ echo "Running post-commit notifications..."
         exit 1
     fi
 
-# Webhook URLs retrieved from secret.txt
-if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
+# Webhook URLs retrieved from secret.txt. Use ${VAR:-} rather than $VAR
+# here: under `set -u`, secret.txt not defining one of these at all (as
+# opposed to defining it empty) would otherwise abort the hook with an
+# "unbound variable" error instead of the intended message below.
+if [[ -n "${SLACK_WEBHOOK_URL:-}" && -n "${DISCORD_WEBHOOK_URL:-}" ]]; then
     echo "Webhook URLs successfully retrieved."
+
+    # Trim any leading/trailing whitespace and CRLF line endings from both
+    # webhook URLs. This is necessary when a variable is on the first line
+    # of the secret.txt file.
+    SLACK_WEBHOOK_URL=$(echo "$SLACK_WEBHOOK_URL" | tr -d '\r' | xargs)
+    DISCORD_WEBHOOK_URL=$(echo "$DISCORD_WEBHOOK_URL" | tr -d '\r' | xargs)
 
 ### Slack
     # Slack webhook URL (generated from Slack/Apps/Incoming WebHooks)
@@ -99,13 +109,9 @@ if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
     SLACK_PAYLOAD="{
         \"text\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: *$COMMIT_AUTHOR*\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
     }"
-    
-    # Trim any leading or trailing whitespace from the SLACK_WEBHOOK_URL.
-    # This is necessary when the variable is on the first line of the secret.txt file.
-    SLACK_WEBHOOK_URL=$(echo "$SLACK_WEBHOOK_URL" | tr -d '\r' | xargs)
 
     # Send the string to Slack as a payload and capture the response
-    RESPONSE=$(curl -s -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" $SLACK_WEBHOOK_URL)
+    RESPONSE=$(curl -s -X POST -H 'Content-type: application/json' --data "$SLACK_PAYLOAD" "$SLACK_WEBHOOK_URL")
 
     # Check if the response from Slack contains "ok"
     if [[ "$RESPONSE" == "ok" ]]; then
@@ -124,12 +130,8 @@ if [[ -n "$SLACK_WEBHOOK_URL" && -n "$DISCORD_WEBHOOK_URL" ]]; then
         \"content\": \"Notification - a new commit\nCommit hash: <$COMMIT_HASH>\nAuthor: **$COMMIT_AUTHOR**\nDate: $COMMIT_DATE\nMessage: $COMMIT_MESSAGE\"
     }"
 
-    # Trim any leading or trailing whitespace from the SLACK_WEBHOOK_URL
-    # This is necessary when the variable is on the first line of the secret.txt file.    
-    DISCORD_WEBHOOK_URL=$(echo "$DISCORD_WEBHOOK_URL" | tr -d '\r' | xargs)
-
     # Send the string to Discord as a payload and capture the HTTP status code
-    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-type: application/json' --data "$DISCORD_PAYLOAD" $DISCORD_WEBHOOK_URL)
+    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-type: application/json' --data "$DISCORD_PAYLOAD" "$DISCORD_WEBHOOK_URL")
 
     # Check if the status code is 2xx (success)
     if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
@@ -144,10 +146,8 @@ fi
 
 echo "Done sending notifications."
 
+fi # NOTIFICATIONS_ENABLED
 
-#######################
-######## Push #########
-#######################
 
 # Note: careful with this, more dangerous. Tested, works, but commenting it out for safer practices.
 # Optionally, can automatically push the commit to the remote repository.
@@ -155,4 +155,4 @@ echo "Done sending notifications."
 
 
 # Display the end message
-echo "HOOK - POST-COMMIT - END"
+hook_end "POST-COMMIT"

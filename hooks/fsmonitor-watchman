@@ -1,0 +1,44 @@
+#!/bin/bash
+# A Git fsmonitor-watchman hook example.
+# Used by Git's "fsmonitor" feature (core.fsmonitor) to speed up status/
+# diff/add on very large working trees: instead of Git stat()-ing every
+# tracked file itself, it calls this hook, which is expected to report
+# only the files that changed since a given point in time - normally by
+# querying a file-watching daemon (Watchman) that already tracks this.
+#
+# Git calls this with two arguments: a protocol version (currently "2")
+# and a token representing "since when" (an opaque value Git tracks
+# itself between calls). On stdout, Git expects:
+#   - a version line (matching the requested version), then
+#   - a NUL-byte-separated list of changed paths relative to the repo
+#     root, or nothing at all to mean "assume everything may have
+#     changed" (Git then falls back to a full scan).
+#
+# This example does not depend on Watchman actually being installed: if
+# the `watchman` binary isn't on PATH, it degrades to telling Git "I
+# don't know, please do a full scan" rather than reporting no changes
+# (which would incorrectly hide real changes from `git status`).
+
+set -uo pipefail
+
+VERSION="$1"
+_TOKEN="$2"
+
+echo "$VERSION"
+
+if ! command -v watchman >/dev/null 2>&1; then
+  # No changed-file list on stdout at all means "assume everything may
+  # have changed" - the safe fallback, not silence-as-"nothing changed".
+  exit 0
+fi
+
+# A real implementation would run something like:
+#   watchman -j <<-EOF
+#   ["query", "$(git rev-parse --show-toplevel)", {
+#     "since": "$_TOKEN",
+#     "fields": ["name"]
+#   }]
+#   EOF
+# and print the resulting file list NUL-separated. Omitted here since it
+# requires a running Watchman daemon and a real repo to query.
+exit 0

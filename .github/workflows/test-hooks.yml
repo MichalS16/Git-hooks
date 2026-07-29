@@ -1,0 +1,46 @@
+# Runs the Bats test suite automatically on every push and pull request.
+name: Test hook scripts
+
+on:
+  push:
+  pull_request:
+
+# The job only reads the repo, so the token gets read-only access.
+permissions:
+  contents: read
+
+jobs:
+  bats:
+    runs-on: ubuntu-latest
+    steps:
+      # Fetches the repo's code onto the CI runner.
+      - uses: actions/checkout@v4
+
+      # hooks-accessories/ has non-script files (images, secret.txt), so it's excluded here.
+      - name: Syntax-check all hook scripts
+        run: |
+          set -uo pipefail
+          STATUS=0
+          while IFS= read -r -d '' FILE; do
+            if ! bash -n "$FILE"; then
+              echo "::error file=$FILE::Syntax error"
+              STATUS=1
+            fi
+          done < <(find hooks -type f -print0)
+          bash -n hooks-accessories/install-hooks.sh || STATUS=1
+          exit $STATUS
+
+      # Speeds up future runs by reusing downloaded apt packages.
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-bats-${{ runner.os }}
+
+      # Installs the Bats test runner used below.
+      - name: Install Bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+
+      # Runs every test in tests/*.bats.
+      - name: Run hook tests
+        run: bats tests/

@@ -1,0 +1,35 @@
+#!/bin/bash
+# A Git pre-applypatch hook example.
+# Part of the `git am` trio alongside applypatch-msg (message validation,
+# before the patch content is applied) and post-applypatch (after the
+# commit from the patch is created). This one runs after `git am` has
+# already applied the patch to the working tree/index but BEFORE it
+# commits - the last point at which a bad patch can still be rejected
+# without needing to be un-committed afterwards.
+# Git calls this with no arguments.
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+
+hook_start "PRE-APPLYPATCH"
+
+# A common real-world use of this hook: run the same quick checks a
+# regular pre-commit would, on the patch that was just applied, before
+# `git am` turns it into a commit.
+for TOOL in flake8; do
+  if ! command -v "$TOOL" >/dev/null 2>&1; then
+    echo "Note: '$TOOL' is not installed or not on PATH; skipping patch content checks."
+    hook_end "PRE-APPLYPATCH"
+    exit 0
+  fi
+done
+
+echo "Running Flake8 on the applied patch content..."
+if ! flake8 . --exclude=.venv; then
+  echo "Code issues detected in the applied patch. Please fix them, then re-run 'git am --continue' or abort with 'git am --abort'."
+  exit 1
+fi
+
+hook_end "PRE-APPLYPATCH"

@@ -1,0 +1,48 @@
+#!/bin/bash
+# A Git reference-transaction hook example.
+#
+# Unlike the other server-side hooks here, this one is NOT specific to
+# pushes - it belongs anywhere Git updates a ref (client or server:
+# a plain .git/hooks/ on a normal checkout works fine for this one,
+# unlike pre-receive/update/post-receive/post-update/push-to-checkout/
+# proc-receive, which only make sense in a bare repo receiving pushes).
+# It's included alongside the server-side hooks here because auditing/
+# replicating ref changes is most commonly wanted on a shared server.
+#
+# Git calls this hook up to three times per ref-update transaction,
+# with the state as $1: "prepared" (about to apply, can still be
+# aborted), "committed" (applied), or "aborted" (rolled back). Each
+# call gets one "<old sha1> <new sha1> <ref name>" line on stdin per
+# ref in the transaction.
+
+set -uo pipefail
+
+STATE="$1"
+
+echo "HOOK - REFERENCE-TRANSACTION (server-side) - START ($STATE):"
+
+# Only reject during "prepared" - by "committed" or "aborted" the
+# outcome is already decided and a non-zero exit is ignored by Git.
+while read -r OLD_SHA NEW_SHA REF_NAME; do
+  [ -z "$REF_NAME" ] && continue
+
+  # A common real-world use: log every ref change for an audit trail,
+  # which is exactly the kind of thing you can't reliably get from
+  # pre-receive/post-receive alone (those only see pushes, not every
+  # local ref update like a fetch's remote-tracking branch update or a
+  # local branch move).
+  echo "HOOK - REFERENCE-TRANSACTION ($STATE): $REF_NAME  $OLD_SHA -> $NEW_SHA"
+
+  if [ "$STATE" = "prepared" ]; then
+    # Example policy: refuse to let any transaction delete the
+    # protected main/master branch (all-zeros new SHA means deletion).
+    BRANCH_NAME="${REF_NAME#refs/heads/}"
+    if [[ "$BRANCH_NAME" =~ ^(main|master)$ ]] && [[ "$NEW_SHA" =~ ^0+$ ]]; then
+      echo "Error: refusing to delete protected branch '$BRANCH_NAME'."
+      exit 1
+    fi
+  fi
+done
+
+echo "HOOK - REFERENCE-TRANSACTION (server-side) - END"
+exit 0

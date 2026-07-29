@@ -1,0 +1,22 @@
+#!/bin/bash
+# A Git post-update server-side hook example.
+# Belongs in the bare repository on the Git server (see the note in
+# pre-receive for why server-side hooks live there, not in a client's
+# .git/hooks/). Runs after a push has already updated all refs -
+# too late to reject anything, so this is for side effects only, such
+# as notifying other systems or updating server-side info files.
+# Git calls this with the list of updated ref names as arguments.
+
+set -uo pipefail
+
+echo "HOOK - POST-UPDATE (server-side) - START:"
+
+for REF_NAME in "$@"; do
+  echo "Ref updated: $REF_NAME"
+done
+
+# A very common real-world use: keep the "info/refs" file used by the
+# dumb HTTP transport in sync after every push.
+git update-server-info
+
+echo "HOOK - POST-UPDATE (server-side) - END"

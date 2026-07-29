@@ -1,0 +1,27 @@
+#!/bin/bash
+# A Git pre-rebase hook example.
+# Runs before `git rebase` starts. Returning a non-zero exit code aborts
+# the rebase before it touches anything.
+# Git calls this with the upstream branch as $1, and the branch being
+# rebased as $2 (only set for `git rebase <upstream> <branch>`).
+
+set -uo pipefail
+
+UPSTREAM="$1"
+BRANCH_BEING_REBASED="${2:-$(git rev-parse --abbrev-ref HEAD)}"
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+# shellcheck source=hooks/lib/protected-branches.sh
+source "$(dirname "$0")/lib/protected-branches.sh"
+
+hook_start "PRE-REBASE"
+
+if [[ "$BRANCH_BEING_REBASED" =~ $PROTECTED_BRANCHES ]]; then
+  echo "Error: refusing to rebase protected branch '$BRANCH_BEING_REBASED'."
+  echo "Rebasing a shared branch rewrites history other people may already have pulled."
+  exit 1
+fi
+
+echo "Rebasing '$BRANCH_BEING_REBASED' onto '$UPSTREAM'."
+hook_end "PRE-REBASE"

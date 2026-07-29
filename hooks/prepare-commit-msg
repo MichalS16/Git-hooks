@@ -1,0 +1,53 @@
+#!/bin/bash
+# A Git prepare-commit-msg hook example.
+# Runs after the default commit message is created, but before the editor
+# opens, so it can pre-fill or adjust the message.
+# Git calls this with: <message file> <source: message|template|merge|squash|commit> <commit sha, if source is 'commit'>
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+
+MSG_FILE="$1"
+COMMIT_SOURCE="${2:-}"
+
+hook_start "PREPARE-COMMIT-MSG"
+
+# Only auto-prefix commits that don't already have a purpose-built message:
+# "message" (git commit -m/-F) and no source at all (interactive editor).
+# Skip merges ("merge") and editor-based squashes/amends
+# ("squash"/"commit"), which already have a message we don't want to
+# disturb.
+#
+# NOTE on -m: Git only reports COMMIT_SOURCE="squash"/"commit" when the
+# corresponding operation (`git merge --squash` + commit, or
+# `git commit --amend`) is finished via the editor, with no -m given.
+# Supplying -m to either (`git commit -m "..."` after a --squash merge,
+# or `git commit --amend -m "..."`) reports COMMIT_SOURCE="message" -
+# indistinguishable from an ordinary `git commit -m`, a distinction Git
+# does not expose to this hook. So `-m` on either of those, on a
+# ticket-branch commit that's already prefixed, still gets the
+# (harmless, idempotent) prefix-if-missing check below applied;
+# genuinely re-prefixing only happens if you also change the subject
+# text you started with, which is an accepted rough edge of this
+# example, not something fixable within this hook's inputs.
+case "$COMMIT_SOURCE" in
+  merge|squash|commit)
+    hook_end "PREPARE-COMMIT-MSG"
+    exit 0
+    ;;
+esac
+
+BRANCH_NAME="$(git rev-parse --abbrev-ref HEAD)"
+# Pull a leading ticket/issue id out of a branch name like "JEM224-42-fix-hooks".
+TICKET_ID="$(echo "$BRANCH_NAME" | grep -oE '^[A-Z]+[0-9]*-[0-9]+' || true)"
+
+if [ -n "$TICKET_ID" ]; then
+  EXISTING_MSG="$(cat "$MSG_FILE")"
+  if [[ "$EXISTING_MSG" != "$TICKET_ID"* ]]; then
+    printf '%s: %s' "$TICKET_ID" "$EXISTING_MSG" > "$MSG_FILE"
+  fi
+fi
+
+hook_end "PREPARE-COMMIT-MSG"

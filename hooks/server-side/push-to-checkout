@@ -1,0 +1,60 @@
+#!/bin/bash
+# A Git push-to-checkout server-side hook example.
+#
+# Belongs on the Git server, like the rest of hooks/server-side/ - but
+# unlike pre-receive/update/post-receive/post-update, it only matters
+# when the receiving repository is a NON-bare repo with a checked-out
+# working tree that receive.denyCurrentBranch has been set to allow
+# pushing into (normally Git refuses this, since it can't update the
+# working tree and the index atomically with the push). When that's
+# allowed, this hook is the only thing standing in for the "update the
+# working tree" step Git would otherwise refuse to do automatically -
+# if this hook doesn't exist, updating the currently-checked-out branch
+# via push simply fails.
+#
+# Git calls this with a single argument: the new commit's SHA. There is
+# no ref name or old-SHA argument - this hook only ever runs for the
+# single branch currently checked out in this working tree (that's the
+# whole reason it's needed at all: receive.denyCurrentBranch=updateInstead
+# only permits pushing to the currently-checked-out branch in the first
+# place), and the old SHA is simply the working tree's current HEAD.
+# The hook is expected to update the working tree/index to match the
+# new commit, returning non-zero to reject the push if it can't.
+
+set -uo pipefail
+
+NEW_SHA="$1"
+
+echo "HOOK - PUSH-TO-CHECKOUT (server-side) - updating working tree to $NEW_SHA"
+
+# On the very first push to an empty repository there is no HEAD yet -
+# git rev-parse/diff-index would fail on "bad revision 'HEAD'", which
+# is not the same thing as "the working tree has uncommitted changes"
+# and must not be treated as one.
+if git rev-parse --quiet --verify HEAD >/dev/null; then
+  OLD_SHA="$(git rev-parse HEAD)"
+
+  # Refuse to touch anything if the working tree has uncommitted local
+  # changes - blindly running `git read-tree -u` here would silently
+  # overwrite them.
+  if ! git diff-index --quiet HEAD --; then
+    echo "Error: the working tree has uncommitted local changes; refusing to update it via push."
+    echo "Push was still accepted into the repository - only the working tree wasn't updated."
+    exit 1
+  fi
+else
+  # No prior commit to diff against - Git's well-known empty-tree
+  # object hash (SHA-1; this hook doesn't need to support SHA-256
+  # repos) is the documented placeholder for "nothing" here.
+  OLD_SHA="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+fi
+
+# Update both the index and the working tree to match the new commit.
+if git read-tree -u -m "$OLD_SHA" "$NEW_SHA"; then
+  echo "Working tree updated to $NEW_SHA."
+else
+  echo "Error: failed to update the working tree to $NEW_SHA."
+  exit 1
+fi
+
+echo "HOOK - PUSH-TO-CHECKOUT (server-side) - END"

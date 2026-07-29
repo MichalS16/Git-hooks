@@ -1,0 +1,42 @@
+#!/bin/bash
+# A Git pre-receive server-side hook example.
+#
+# UNLIKE the hooks in hooks/, this does NOT belong in a client's
+# .git/hooks/ directory. Server-side hooks live in the *bare* repository
+# on the Git server (e.g. <repo>.git/hooks/pre-receive) and run once per
+# push, before any refs are updated, with the power to reject the push
+# entirely by exiting non-zero. This is the only hook family that can
+# truly enforce a policy for everyone, since client-side hooks (hooks/)
+# can always be skipped locally with `git commit --no-verify` or simply
+# never installed.
+#
+# Git feeds one line per updated ref on stdin: "<old sha1> <new sha1> <ref name>".
+
+set -uo pipefail
+
+echo "HOOK - PRE-RECEIVE (server-side) - START:"
+
+REJECT=0
+while read -r OLD_SHA NEW_SHA REF_NAME; do
+  BRANCH_NAME="${REF_NAME#refs/heads/}"
+
+  # Reject force-pushes (non-fast-forward updates) to main/master: this is
+  # the kind of guarantee only a server-side hook can actually provide.
+  # Keep this pattern in sync with hooks/lib/protected-branches.sh and
+  # hooks/server-side/update if the set of protected branches changes.
+  if [[ "$BRANCH_NAME" =~ ^(main|master)$ ]]; then
+    if [ "$OLD_SHA" != "0000000000000000000000000000000000000000" ]; then
+      if ! git merge-base --is-ancestor "$OLD_SHA" "$NEW_SHA" 2>/dev/null; then
+        echo "Error: rejecting non-fast-forward push to protected branch '$BRANCH_NAME'."
+        REJECT=1
+      fi
+    fi
+  fi
+done
+
+if [ "$REJECT" -ne 0 ]; then
+  echo "Push rejected."
+  exit 1
+fi
+
+echo "HOOK - PRE-RECEIVE (server-side) - END"

@@ -1,0 +1,33 @@
+#!/bin/bash
+# A Git commit-msg hook example.
+# Validates the commit message format before the commit is finalized.
+# Receives the path to a temp file containing the commit message as $1.
+
+set -uo pipefail
+
+MSG_FILE="$1"
+MSG_FIRST_LINE="$(head -n 1 "$MSG_FILE")"
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+# shellcheck source=hooks/lib/validate-message.sh
+source "$(dirname "$0")/lib/validate-message.sh"
+
+hook_start "COMMIT-MSG"
+
+# Enforce a minimum subject-line length so messages like "fix" or "wip"
+# are rejected in favor of something a reviewer can actually act on.
+if ! validate_message_length "$MSG_FIRST_LINE"; then
+  echo "Aborting the commit."
+  exit 1
+fi
+
+# Reject the default squash/merge placeholder message if left unedited.
+if [[ "$MSG_FIRST_LINE" == "WIP"* ]]; then
+  echo "Error: commit message starts with 'WIP'. Please write a real commit message."
+  echo "Aborting the commit."
+  exit 1
+fi
+
+echo "Commit message accepted."
+hook_end "COMMIT-MSG"

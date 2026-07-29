@@ -1,0 +1,81 @@
+#!/bin/bash
+# A Git proc-receive server-side hook example.
+#
+# Belongs on the Git server, alongside pre-receive/update/post-receive.
+# Used to delegate handling of specific ref updates to an external
+# process instead of letting Git update them directly - the mechanism
+# tools like Gerrit use to turn a plain `git push` into "create a code
+# review" rather than "update a branch" (e.g. pushing to refs/for/main
+# creates a review instead of moving main). Git only invokes
+# proc-receive for refs whose name matches receive.procReceiveRefs
+# (configured server-side); anything not matched is handled by the
+# normal pre-receive/update/post-receive path as usual.
+#
+# Unlike every other hook in this repo, proc-receive speaks Git's
+# pkt-line wire protocol over stdin/stdout, not plain text: each
+# message is a 4-hex-digit length prefix (the length includes those 4
+# bytes) followed by that many bytes of payload, and a "0000" length
+# with no payload is a "flush packet" marking the end of a section.
+# The helper functions below implement just enough of that framing to
+# speak proc-receive's specific message sequence (version negotiation,
+# then one report line per ref, ending with a flush).
+
+set -uo pipefail
+
+# Reads exactly one pkt-line from stdin and prints its payload (without
+# the flush pseudo-line, which prints nothing and returns 1).
+read_pktline() {
+  local LEN_HEX PAYLOAD LEN
+  IFS= read -r -n 4 LEN_HEX || return 1
+  LEN=$((16#$LEN_HEX))
+  if [ "$LEN" -eq 0 ]; then
+    return 1 # flush packet
+  fi
+  # Payload length excludes the 4-byte length prefix already consumed,
+  # and Git includes the trailing newline of the line in that count.
+  IFS= read -r -n $((LEN - 4)) PAYLOAD
+  printf '%s' "$PAYLOAD"
+}
+
+# Writes $1 as a single pkt-line (adds the 4-hex-digit length prefix).
+write_pktline() {
+  local PAYLOAD="$1"
+  # +1 for the payload's own trailing newline this function adds.
+  printf '%04x%s\n' "$((${#PAYLOAD} + 5))" "$PAYLOAD"
+}
+
+# Writes a flush packet, marking the end of a section of pkt-lines.
+write_flush() {
+  printf '0000'
+}
+
+echo "HOOK - PROC-RECEIVE (server-side) - START:" >&2
+
+# Version negotiation: Git sends a pkt-line "version=1<NUL>capabilities"
+# then a flush packet; we must answer with the version we support,
+# also followed by a flush, before Git will send anything else.
+read_pktline >/dev/null
+read_pktline >/dev/null # consume the flush (returns empty, but drains it)
+write_pktline "version=1"
+write_flush
+
+# Then Git sends one "<old sha1> <new sha1> <ref name>" pkt-line per ref
+# this hook was asked to handle, ending with a flush packet.
+while LINE="$(read_pktline)"; do
+  [ -z "$LINE" ] && break
+  read -r OLD_SHA NEW_SHA REF_NAME <<< "$LINE"
+
+  # A common real-world use: refuse ref names this hook doesn't
+  # recognize how to turn into a review/ticket, rather than silently
+  # accepting them as ordinary branch updates.
+  if [[ "$REF_NAME" == refs/for/* ]]; then
+    TARGET_BRANCH="${REF_NAME#refs/for/}"
+    echo "Note: would open a code review against '$TARGET_BRANCH' for $NEW_SHA (not actually implemented - example only)." >&2
+    write_pktline "ok $REF_NAME"
+  else
+    write_pktline "ng $REF_NAME proc-receive example only handles refs/for/* pushes"
+  fi
+done
+write_flush
+
+echo "HOOK - PROC-RECEIVE (server-side) - END" >&2

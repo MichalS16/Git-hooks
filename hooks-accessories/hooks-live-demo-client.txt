@@ -1,0 +1,282 @@
+# Real terminal output from actually installing and running every
+# CLIENT-SIDE hook in this repo (except pre-commit/post-commit, which
+# already have their own real-output demonstration in
+# hooks-accessories/commit-log.txt). Server-side hooks are in the sibling
+# file hooks-accessories/hooks-live-demo-server.txt.
+#
+# Nothing below was typed by hand: each block is copied verbatim from
+# running the real Git command in a throwaway scratch repo with the real
+# hook script installed, author MichalS16. Where a hook can both accept
+# and reject something, both real outcomes are shown, so this reads as a
+# demonstration of the hooks actually catching problems, not a list of
+# clean successes.
+#
+# See THEORY.md for what each hook is for and hooks/ for its full
+# commented source.
+
+--------------------------------------------------------------------------
+prepare-commit-msg - prefixes the message with a ticket ID from the branch
+--------------------------------------------------------------------------
+$ git checkout -b JEM224-42-fix-hooks
+$ git commit -m "Add second file"
+
+HOOK - PREPARE-COMMIT-MSG - START:
+HOOK - PREPARE-COMMIT-MSG - END
+[JEM224-42-fix-hooks 06c02de] JEM224-42: Add second file
+ 1 file changed, 1 insertion(+)
+ create mode 100644 b.py
+
+(The subject line "Add second file" became "JEM224-42: Add second file" -
+the branch name's leading ticket ID was detected and prepended.)
+
+--------------------------------------------------------------------------
+commit-msg - REJECTED: subject line too short
+--------------------------------------------------------------------------
+$ git commit -m "fix"
+
+HOOK - COMMIT-MSG - START:
+Error: commit message subject line is too short (min 10 characters).
+Got: "fix"
+Aborting the commit.
+
+--------------------------------------------------------------------------
+commit-msg - REJECTED: WIP placeholder (also caught by the length check,
+since "WIP" is under the 10-character minimum)
+--------------------------------------------------------------------------
+$ git commit -m "WIP"
+
+HOOK - COMMIT-MSG - START:
+Error: commit message subject line is too short (min 10 characters).
+Got: "WIP"
+Aborting the commit.
+
+--------------------------------------------------------------------------
+commit-msg - SUCCESS
+--------------------------------------------------------------------------
+$ git commit -m "Add configuration constant c.py"
+
+HOOK - COMMIT-MSG - START:
+Commit message accepted.
+HOOK - COMMIT-MSG - END
+[JEM224-42-fix-hooks e833063] Add configuration constant c.py
+ 1 file changed, 1 insertion(+)
+ create mode 100644 c.py
+
+--------------------------------------------------------------------------
+applypatch-msg + pre-applypatch - REJECTED: Flake8 issues in the applied
+patch (git am trio, patch 1 of 2)
+--------------------------------------------------------------------------
+$ git am bad_patch.mbox
+
+HOOK - APPLYPATCH-MSG - START:
+Patch message accepted.
+HOOK - APPLYPATCH-MSG - END
+Applying: Add d.py with style issues
+HOOK - PRE-APPLYPATCH - START:
+Running Flake8 on the applied patch content...
+.\d.py:1:1: F401 'os' imported but unused
+.\d.py:2:1: E302 expected 2 blank lines, found 0
+.\d.py:2:9: E201 whitespace after '('
+Code issues detected in the applied patch. Please fix them, then re-run
+'git am --continue' or abort with 'git am --abort'.
+
+$ git am --abort
+
+--------------------------------------------------------------------------
+applypatch-msg + pre-applypatch + post-applypatch - SUCCESS (git am trio,
+clean patch)
+--------------------------------------------------------------------------
+$ git am good_patch.mbox
+
+HOOK - APPLYPATCH-MSG - START:
+Patch message accepted.
+HOOK - APPLYPATCH-MSG - END
+Applying: Add e.py cleanly formatted
+HOOK - PRE-APPLYPATCH - START:
+Running Flake8 on the applied patch content...
+HOOK - PRE-APPLYPATCH - END
+HOOK - POST-APPLYPATCH - START:
+Patch applied via 'git am': dfa817c65be3bb8afb7ac74091a2900bfa436739 - Add e.py cleanly formatted
+HOOK - POST-APPLYPATCH - END
+
+--------------------------------------------------------------------------
+post-checkout - warns that hooks/ changed on the branch you just switched to
+--------------------------------------------------------------------------
+$ git checkout feature/demo
+
+HOOK - POST-CHECKOUT - START:
+Switched branches: feature/demo
+Note: hooks/ changed on this branch. Run 'bash hooks-accessories/install-hooks.sh' to update your installed hooks.
+HOOK - POST-CHECKOUT - END
+
+--------------------------------------------------------------------------
+post-merge - warns that a dependency file changed in the merge
+--------------------------------------------------------------------------
+$ git merge --no-ff feature/deps -m "Merge feature/deps"
+
+Merge made by the 'ort' strategy.
+ requirements.txt | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 requirements.txt
+HOOK - POST-MERGE - START:
+Note: dependency files changed in this merge. Consider reinstalling dependencies.
+HOOK - POST-MERGE - END
+
+--------------------------------------------------------------------------
+pre-rebase - REJECTED: refuses to rebase the protected branch 'main'
+--------------------------------------------------------------------------
+$ git checkout main
+$ git rebase HEAD~1
+
+HOOK - PRE-REBASE - START:
+Error: refusing to rebase protected branch 'main'.
+Rebasing a shared branch rewrites history other people may already have pulled.
+error: The pre-rebase hook refused to rebase.
+
+--------------------------------------------------------------------------
+pre-rebase - SUCCESS on an ordinary feature branch
+--------------------------------------------------------------------------
+$ git checkout feature/demo
+$ git rebase main
+
+HOOK - PRE-REBASE - START:
+Rebasing 'feature/demo' onto 'main'.
+HOOK - PRE-REBASE - END
+Successfully rebased and updated refs/heads/feature/demo.
+
+--------------------------------------------------------------------------
+pre-push - warns before pushing directly to the protected branch 'main'
+(does not block the push, just flags it)
+--------------------------------------------------------------------------
+$ git push origin main
+
+HOOK - PRE-PUSH - START:
+Warning: you are pushing directly to protected branch 'main'.
+Make sure this push has already been reviewed (e.g. via a pull request).
+HOOK - PRE-PUSH - END
+To <remote>
+ * [new branch]      main -> main
+
+--------------------------------------------------------------------------
+post-rewrite - reports how many commits were rewritten by 'amend'
+--------------------------------------------------------------------------
+$ git commit --amend -m "Merge feature/deps (amended message)"
+
+HOOK - POST-REWRITE - START (amend):
+1 commit(s) rewritten via 'amend'.
+HOOK - POST-REWRITE - END
+[main 748d937] Merge feature/deps (amended message)
+
+--------------------------------------------------------------------------
+post-rewrite - reports how many commits were rewritten by 'rebase', and
+warns about needing a force-push
+--------------------------------------------------------------------------
+$ git rebase main
+
+HOOK - POST-REWRITE - START (rebase):
+2 commit(s) rewritten via 'rebase'.
+Note: commit hashes changed. If you already pushed this branch, you'll need to force-push (with --force-with-lease).
+HOOK - POST-REWRITE - END
+Successfully rebased and updated refs/heads/feature/demo.
+
+--------------------------------------------------------------------------
+pre-auto-gc - skips gc outside the maintenance window (current hour
+faked as 14 via a stubbed `date`, real logic, real exit code)
+--------------------------------------------------------------------------
+$ bash hooks/pre-auto-gc   # with `date +%H` stubbed to 14
+
+HOOK - PRE-AUTO-GC - START:
+Outside maintenance window (1:00-5:00); skipping auto-gc for now.
+exit: 1
+
+--------------------------------------------------------------------------
+pre-auto-gc - allows gc inside the maintenance window (hour stubbed to 03)
+--------------------------------------------------------------------------
+HOOK - PRE-AUTO-GC - START:
+Within maintenance window; allowing auto-gc to proceed.
+HOOK - PRE-AUTO-GC - END
+exit: 0
+
+--------------------------------------------------------------------------
+sendemail-validate - REJECTED: unresolved merge-conflict markers in the
+patch email content
+--------------------------------------------------------------------------
+$ bash hooks/sendemail-validate bad_email.txt
+
+HOOK - SENDEMAIL-VALIDATE - START:
+Error: bad_email.txt contains unresolved merge-conflict markers.
+Aborting 'git send-email'.
+exit: 1
+
+--------------------------------------------------------------------------
+sendemail-validate - SUCCESS: clean patch email
+--------------------------------------------------------------------------
+$ bash hooks/sendemail-validate good_email.txt
+
+HOOK - SENDEMAIL-VALIDATE - START:
+Email content accepted.
+HOOK - SENDEMAIL-VALIDATE - END
+exit: 0
+
+--------------------------------------------------------------------------
+fsmonitor-watchman - watchman isn't installed in this environment, so it
+falls back to "assume everything changed" (version line only, no file
+list, exit 0) rather than incorrectly reporting "nothing changed"
+--------------------------------------------------------------------------
+$ bash hooks/fsmonitor-watchman 2 some-opaque-token
+
+2
+exit: 0
+
+--------------------------------------------------------------------------
+pre-merge-commit - REJECTED: Flake8 issues in the merged result, on the
+protected branch 'main'
+--------------------------------------------------------------------------
+$ git checkout main
+$ git merge --no-ff feature/badcode -m "Merge feature/badcode"
+
+HOOK - PRE-MERGE-COMMIT - START:
+Merging into protected branch 'main' - running extra checks...
+.\f.py:1:1: F401 'sys' imported but unused
+.\f.py:2:1: E302 expected 2 blank lines, found 0
+.\f.py:2:9: E201 whitespace after '('
+.\f.py:3:3: F841 local variable 'x' is assigned to but never used
+.\f.py:3:3: E111 indentation is not a multiple of 4
+.\f.py:3:4: E225 missing whitespace around operator
+Code issues detected in the merged result. Aborting the merge commit.
+Not committing merge; use 'git commit' to complete the merge.
+
+--------------------------------------------------------------------------
+pre-merge-commit - SUCCESS after fixing the code on the feature branch and
+retrying the same merge
+--------------------------------------------------------------------------
+$ git merge --no-ff feature/badcode -m "Merge feature/badcode (fixed)"
+
+HOOK - PRE-MERGE-COMMIT - START:
+Merging into protected branch 'main' - running extra checks...
+HOOK - PRE-MERGE-COMMIT - END
+Merge made by the 'ort' strategy.
+ f.py | 2 ++
+ 1 file changed, 2 insertions(+)
+ create mode 100644 f.py
+
+--------------------------------------------------------------------------
+post-index-change - working tree updated (e.g. after `git reset --hard`)
+--------------------------------------------------------------------------
+$ git reset --hard HEAD
+
+HOOK - POST-INDEX-CHANGE - START:
+Working tree updated - a tool watching the index (e.g. an IDE or file watcher) should refresh.
+HOOK - POST-INDEX-CHANGE - END
+HEAD is now at c7e9a50 Merge feature/badcode (fixed)
+
+--------------------------------------------------------------------------
+post-index-change - index-only update (e.g. after `git reset --mixed`,
+following a `git add`)
+--------------------------------------------------------------------------
+$ git add newfile.txt
+$ git reset --mixed HEAD
+
+HOOK - POST-INDEX-CHANGE - START:
+Index updated without touching the working tree (e.g. after 'git add').
+HOOK - POST-INDEX-CHANGE - END

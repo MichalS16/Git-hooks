@@ -1,5 +1,7 @@
 # Theory of Git Hooks
 
+> Every hook described below has a small, working example script in this repo: client-side hooks in [`hooks/`](hooks/), server-side hooks in [`hooks/server-side/`](hooks/server-side/). See the table in [README.md](README.md#-hooks) for a one-line summary of what each example does.
+
 ## Introduction
 
 **Git hooks** are powerful scripts that allow you to automate tasks and enforce policies at key points during the Git workflow. These scripts are triggered by specific Git actions such as making a commit, pushing changes, or merging branches. By leveraging Git hooks, developers can enhance productivity by automating tasks such as running tests, checking for code quality, or verifying commit messages, ensuring the repository maintains a high standard of code quality and consistency.
@@ -27,6 +29,20 @@ Git hooks are categorized into two main types based on where they are executed:
 2. **Server-Side Hooks**: These run on the Git server and are triggered by actions such as pushes or merges. They are used to enforce policies across the repository, validate incoming changes, and automate deployment processes.
 
 Each type of hook plays a crucial role in enhancing workflow efficiency and maintaining code quality throughout the development lifecycle.
+
+## How Hooks Actually Behave
+
+A few mechanics apply to every hook and are easy to miss if you've only seen individual examples:
+
+- **Exit codes decide the outcome, and only for hooks that run *before* the thing they're checking.** A non-zero exit from `pre-commit`, `commit-msg`, `pre-push`, `pre-receive`, `update`, `pre-rebase`, `pre-merge-commit`, or `pre-auto-gc` aborts the operation - the commit is never made, the push is rejected, and so on. Hooks that run *after* the fact - `post-commit`, `post-checkout`, `post-merge`, `post-receive`, `post-update`, `post-rewrite`, `post-applypatch` - can't undo anything that already happened; their exit code is purely informational (Git logs it but doesn't act on it). This repo's own `hooks/post-commit` and `hooks/server-side/post-receive` deliberately keep this in mind: neither one tries to use `exit 1` to "cancel" a commit or push that has already completed.
+
+- **`git clone` does not copy hooks.** Hooks live in `.git/hooks/`, which is local, untracked repository metadata - not part of the repository's tracked content that clone/fetch/pull transfer. This is exactly why a project that wants everyone to use the same hooks needs an explicit installation step (this repo's `hooks-accessories/install-hooks.sh`, or a tool like the `pre-commit` framework) rather than being able to rely on the hooks simply arriving with the clone.
+
+- **`.git/hooks/` starts out full of `*.sample` files.** Every fresh `git init`/`git clone` populates `.git/hooks/` with a `<hookname>.sample` file for each hook Git supports - disabled by default (Git only runs a file named exactly `<hookname>`, with no extension, and only if it's executable). This is most people's first encounter with hooks, and it's also why simply dropping a same-named executable file into that directory is enough to activate a hook - no registration step, no config file to edit.
+
+- **`--no-verify` bypasses client-side verification hooks.** Most commands with a client-side verification hook (`git commit`, `git push`, and a few others) accept `--no-verify` to skip it entirely - a legitimate escape hatch for a false-positive check or an emergency commit, not a bug. This is also *why* server-side hooks matter for anything that must be enforced for real: they can't be bypassed with a client-side flag, since they run on the server regardless of what the pushing client asked for (see README "Security Considerations" for how this repo treats that distinction).
+
+- **Git only runs one script per hook name - there's no built-in chaining.** If two different tools each want to react to `pre-commit`, only the last one to overwrite `.git/hooks/pre-commit` actually runs; Git has no mechanism to run several scripts for the same event. This is precisely the gap frameworks like [pre-commit](https://pre-commit.com) (see README, and this repo's own [`.pre-commit-config.yaml`](.pre-commit-config.yaml)) exist to fill: they install one small dispatcher script as the real hook, which then reads a config file and runs as many checks as it lists, in effect adding the chaining Git itself doesn't provide.
 
 ### Client-Side Hooks
 
@@ -58,7 +74,7 @@ For further reading on the different types of Git hooks and their applications, 
 
 ### Historical Development
 
-**Git Hooks** were introduced as part of Git’s core functionality from its inception in 2005. They provide a way to execute scripts at various points in the Git workflow, allowing developers to customize their development processes directly within their local repositories. Git hooks are executed locally on a developer’s machine or on a Git server, which gives them the ability to enforce coding standards, automate testing, and perform pre- or post-commit actions.
+**Git Hooks** were introduced as part of Git's core functionality from its inception in 2005. They provide a way to execute scripts at various points in the Git workflow, allowing developers to customize their development processes directly within their local repositories. Git hooks are executed locally on a developer's machine or on a Git server, which gives them the ability to enforce coding standards, automate testing, and perform pre- or post-commit actions.
 
 On the other hand, **GitHub Actions** was launched by GitHub in November 2019. It revolutionized CI/CD workflows by allowing developers to automate tasks directly within the GitHub platform. GitHub Actions enables users to define workflows that can be triggered by various GitHub events, such as push, pull request, or issue creation. This feature integrates seamlessly with other GitHub functionalities, allowing for automation of testing, building, and deployment processes.
 
@@ -76,7 +92,7 @@ On the other hand, **GitHub Actions** was launched by GitHub in November 2019. I
 
 ### Current Relevance
 
-In today’s development landscape, both Git Hooks and GitHub Actions serve essential but distinct roles.
+In today's development landscape, both Git Hooks and GitHub Actions serve essential but distinct roles.
 
 - **Git Hooks** remain valuable for local development environments, allowing developers to enforce coding standards and run tests before committing code. They are particularly useful in smaller teams or projects where quick validation and immediate feedback are crucial. However, they require setup on each developer's machine, which can lead to inconsistencies if not managed properly.
 
@@ -84,4 +100,4 @@ In today’s development landscape, both Git Hooks and GitHub Actions serve esse
 
 ### Conclusion
 
-Both Git Hooks and GitHub Actions provide powerful tools for automating tasks and ensuring code quality. While Git Hooks are excellent for local validation and immediate feedback, GitHub Actions offer a comprehensive platform for CI/CD workflows that are essential in today’s collaborative development environments. Depending on the project's needs, developers may choose to use one or both methods to streamline their workflows effectively.
+Both Git Hooks and GitHub Actions provide powerful tools for automating tasks and ensuring code quality. While Git Hooks are excellent for local validation and immediate feedback, GitHub Actions offer a comprehensive platform for CI/CD workflows that are essential in today's collaborative development environments. Depending on the project's needs, developers may choose to use one or both methods to streamline their workflows effectively.

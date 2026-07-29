@@ -1,0 +1,40 @@
+#!/bin/bash
+# A Git pre-merge-commit hook example.
+# Runs before a non-fast-forward merge creates its merge commit -
+# after the merge has been resolved (conflicts included) but before
+# it's committed. The merge-commit equivalent of pre-commit: the last
+# checkpoint to reject a merge before it becomes part of history.
+# A fast-forward merge does not create a merge commit, so this hook
+# does not run for one. Git calls this with no arguments.
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+# shellcheck source=hooks/lib/protected-branches.sh
+source "$(dirname "$0")/lib/protected-branches.sh"
+
+hook_start "PRE-MERGE-COMMIT"
+
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+# A common real-world use of this hook: run the same lint/test suite a
+# regular commit would go through, on the merged result, before it's
+# allowed to become a merge commit - catches problems the two branches
+# didn't have individually but that show up once combined.
+if [[ "$CURRENT_BRANCH" =~ $PROTECTED_BRANCHES ]]; then
+  echo "Merging into protected branch '$CURRENT_BRANCH' - running extra checks..."
+
+  if ! command -v flake8 >/dev/null 2>&1; then
+    echo "Note: 'flake8' is not installed or not on PATH; skipping the merge-result check."
+    hook_end "PRE-MERGE-COMMIT"
+    exit 0
+  fi
+
+  if ! flake8 . --exclude=.venv; then
+    echo "Code issues detected in the merged result. Aborting the merge commit."
+    exit 1
+  fi
+fi
+
+hook_end "PRE-MERGE-COMMIT"

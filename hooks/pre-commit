@@ -1,50 +1,85 @@
 #!/bin/bash
 # A Git pre-commit hook example.
 # This is a live working script, implemented in the repo.
-
-
-#---------------------#
-#----- Flag check ----#
-#---------------------#
-
-# This check is necessary to not run pre-commit on additional amend commits that happen in the post-commit hook.
-# Check if the commit has already been amended by looking for a flag file.
-FILE_FLAG=".amend-flag"
-
-if [ -f "$FILE_FLAG" ]; then
-    # If the flag file exists, exit to avoid an infinite loop, but don't remove the file, that is done in the post-commit hook
-    echo "Exiting the re-triggered pre-commit hook to avoid loop."
-    exit 0
-fi
+#
+# set -u:  fail fast on unset variables (typos in $VARS) instead of
+#          silently treating them as empty strings.
+# set -o pipefail: a failure in the left side of a pipe (e.g. `foo | bar`)
+#          fails the whole pipeline instead of being masked by `bar`'s exit
+#          code. We do NOT use `set -e`: exit codes from flake8/pytest/
+#          coverage are checked explicitly below to print a clear message
+#          before aborting, which `set -e` would short-circuit.
+set -uo pipefail
+#
+# NOTE: hook installation is an explicit, one-time step, not something this
+# hook performs on its own. Run "bash hooks-accessories/install-hooks.sh"
+# yourself after cloning or after changing anything under hooks/.
+# A hook that reinstalls itself on every commit would let any change merged
+# into hooks/ become auto-executing, privileged code on a contributor's very
+# next commit, without review. See README "Security Considerations" for
+# details on why this differs from our original submission.
+#
+# --- Original self-installing variant (kept here for reference only) ---
+# echo "Running install-hooks.sh to update hooks and adjust their line endings..."
+# bash hooks-accessories/install-hooks.sh
+# INSTALL_HOOKS_EXIT_CODE=$?
+# if [ $INSTALL_HOOKS_EXIT_CODE -ne 0 ]; then
+#   echo "Failed to run install-hooks.sh. Please check the script and try again."
+#   echo "Aborting the commit."
+#   exit 1
+# fi
+# -------------------------------------------------------------------------
 
 
 #######################
 ####### Messages ######
 #######################
 
-echo "HOOK - PRE-COMMIT - START:"
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+
+hook_start "PRE-COMMIT"
 echo "Your commit is about to happen. Running the pre-commit hooks..."
 
 
 #######################
-#### Hooks install ####
+####### Logging #######
 #######################
 
-# Run install-hooks.sh to update Git hooks and adjust line endings
-echo "Running install-hooks.sh to update hooks and adjust their line endings..."
-# If the following doesn't run, do a "dos2unix hooks-accessories/install-hooks.sh" manually in terminal for Unix-systems
-bash hooks-accessories/install-hooks.sh
-INSTALL_HOOKS_EXIT_CODE=$?
-if [ $INSTALL_HOOKS_EXIT_CODE -ne 0 ]; then
-  echo "Failed to run install-hooks.sh. Please check the script and try again."
-  echo "Aborting the commit."
-  exit 1
-fi
+# Logged and staged here (before the commit exists) instead of amending the
+# commit afterwards in post-commit. This avoids rewriting commit history for
+# every commit, which is the industry-standard way to attach metadata: add
+# it to the commit as it is created, not amend it after the fact.
+echo "Logging commit details..."
+
+FILE_LOG="hooks-accessories/commit-log.txt"
+
+COMMIT_AUTHOR=$(git config user.name)
+COMMIT_DATE=$(date)
+
+echo "------------------------------------------------" >> "$FILE_LOG"
+echo "Author: $COMMIT_AUTHOR" >> "$FILE_LOG"
+echo "Date: $COMMIT_DATE" >> "$FILE_LOG"
+echo "" >> "$FILE_LOG"
+
+git add "$FILE_LOG"
+echo "Done appending commit details to $FILE_LOG."
 
 
 #######################
 ##### Code checks #####
 #######################
+
+# Fail with a clear message instead of a cryptic "command not found" if a
+# required tool isn't installed in the current environment/venv.
+for TOOL in flake8 pytest coverage; do
+  if ! command -v "$TOOL" >/dev/null 2>&1; then
+    echo "Error: '$TOOL' is not installed or not on PATH."
+    echo "Install it (e.g. 'pip install $TOOL') before committing, or activate your virtualenv."
+    echo "Aborting the commit."
+    exit 1
+  fi
+done
 
 # Flake8, style guide enforcement
 echo "Running Flake8, a detector of code style issues and programming errors..."
@@ -55,10 +90,13 @@ if [ $? -ne 0 ]; then
   exit 1 # stop the commit
 fi
 
-# Pytest, unit tests
-echo "Running Pytest, unit tests in the repo..."
-pytest
+# Pytest, unit tests - run once, under coverage, so the suite isn't
+# executed twice on every commit. `coverage run -m pytest` passes through
+# pytest's own exit codes unchanged (0 success, 5 no tests collected).
+echo "Running Pytest (with coverage), unit tests in the repo..."
+coverage run -m pytest # the --no-data-file is somehow buggy for us, so omitted, and removing the report manually later
 PYTEST_EXIT_CODE=$?
+
 if [ $PYTEST_EXIT_CODE -eq 0 ]; then
   echo "Pytest completed successfully."
 elif [ $PYTEST_EXIT_CODE -eq 5 ]; then
@@ -71,7 +109,7 @@ fi
 
 # Code coverage check
 echo "Checking code coverage of Pytest..."
-coverage run -m pytest # the --no-data-file is somehow buggy for us, so omitted, and removing the report manually later
+coverage report
 COVERAGE_EXIT_CODE=$?
 
 if [ $COVERAGE_EXIT_CODE -eq 0 ]; then
@@ -92,4 +130,4 @@ fi
 
 
 # Display the end message
-echo "HOOK - PRE-COMMIT - END"
+hook_end "PRE-COMMIT"

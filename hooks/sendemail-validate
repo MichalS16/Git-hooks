@@ -1,0 +1,34 @@
+#!/bin/bash
+# A Git sendemail-validate hook example.
+# Runs once per outgoing message when using `git send-email`, before it
+# is sent, with the power to reject a message by exiting non-zero. This
+# is the mailing-list-workflow equivalent of commit-msg/applypatch-msg:
+# a last check on patch content before it leaves the machine, for
+# projects that still accept contributions as emailed patches (e.g. the
+# Linux kernel) rather than pull requests.
+# Git calls this with the path to the email file (headers + patch body)
+# to be sent as $1.
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+
+EMAIL_FILE="$1"
+
+hook_start "SENDEMAIL-VALIDATE"
+
+# A common real-world use of this hook: block patches that still contain
+# a local, unresolved merge-conflict marker, which "git am" would
+# otherwise apply as literal file content on the recipient's end. Match
+# both a marker at the start of a line (e.g. in the commit message) and
+# one immediately after a diff's leading "+" (an added line consisting
+# of a marker).
+if grep -qE '^\+?(<<<<<<<|=======|>>>>>>>)' "$EMAIL_FILE"; then
+  echo "Error: $EMAIL_FILE contains unresolved merge-conflict markers."
+  echo "Aborting 'git send-email'."
+  exit 1
+fi
+
+echo "Email content accepted."
+hook_end "SENDEMAIL-VALIDATE"

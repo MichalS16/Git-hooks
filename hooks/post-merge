@@ -1,0 +1,19 @@
+#!/bin/bash
+# A Git post-merge hook example.
+# Runs after a successful `git merge` (including the merge that `git pull`
+# performs). Git calls this with a single flag: 1 for a squash merge, 0 otherwise.
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+
+hook_start "POST-MERGE"
+
+# A common real-world use of this hook: detect that dependency files
+# changed as part of the merge and remind the developer to reinstall.
+if git diff --name-only ORIG_HEAD HEAD 2>/dev/null | grep -qE '(requirements.*\.txt|package(-lock)?\.json)$'; then
+  echo "Note: dependency files changed in this merge. Consider reinstalling dependencies."
+fi
+
+hook_end "POST-MERGE"

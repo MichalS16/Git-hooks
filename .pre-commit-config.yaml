@@ -1,0 +1,31 @@
+# Example configuration for the "pre-commit" framework (https://pre-commit.com),
+# the de-facto industry-standard way to manage Git hooks in real projects.
+#
+# This file is provided as a reference alongside our own hand-written hooks
+# in hooks/ (see README "Security Considerations" for why we kept our own
+# implementation as the primary submission). To actually use this file
+# instead of our own hooks:
+#   pip install pre-commit
+#   pre-commit install
+#
+# Unlike our own install-hooks.sh, "pre-commit install" only ever writes a
+# small, framework-owned dispatcher into .git/hooks/ - it does not let
+# arbitrary repo content become auto-executing on every commit.
+
+repos:
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+
+  - repo: local
+    hooks:
+      # Runs pytest once, under coverage, rather than a separate plain
+      # `pytest` hook plus this one - avoids running the full suite
+      # twice per commit (see hooks/pre-commit for the same fix).
+      - id: coverage
+        name: pytest (with coverage)
+        entry: coverage run -m pytest
+        language: system
+        pass_filenames: false
+        always_run: true

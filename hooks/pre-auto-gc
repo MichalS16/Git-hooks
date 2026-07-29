@@ -1,0 +1,32 @@
+#!/bin/bash
+# A Git pre-auto-gc hook example.
+# Runs before Git performs automatic garbage collection (triggered
+# opportunistically by commands like `git commit` or `git fetch` when
+# enough loose objects have piled up). Unlike `git gc` run manually,
+# auto-gc is silent and unattended, so this is the only checkpoint
+# available before it prunes/repacks anything. Returning non-zero
+# skips the gc run.
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+# shellcheck source=hooks/lib/maintenance-window.sh
+source "$(dirname "$0")/lib/maintenance-window.sh"
+
+hook_start "PRE-AUTO-GC"
+
+# Auto-gc can be slow and disruptive during working hours on a shared
+# build machine; skip it outside a defined maintenance window as an
+# example of a real-world guard some teams use.
+MAINTENANCE_START=1
+MAINTENANCE_END=5
+
+if ! in_maintenance_window "$(date +%H)" "$MAINTENANCE_START" "$MAINTENANCE_END"; then
+  echo "Outside maintenance window (${MAINTENANCE_START}:00-${MAINTENANCE_END}:00); skipping auto-gc for now."
+  exit 1
+fi
+
+echo "Within maintenance window; allowing auto-gc to proceed."
+hook_end "PRE-AUTO-GC"
+exit 0

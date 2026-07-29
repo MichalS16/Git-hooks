@@ -1,0 +1,28 @@
+#!/bin/bash
+# A Git pre-push hook example.
+# Runs before a push leaves the local machine, so it's the last local
+# checkpoint before code reaches a shared/remote branch.
+#
+# Git calls this hook with the remote name/URL as arguments and feeds it
+# lines of "<local ref> <local sha1> <remote ref> <remote sha1>" on stdin,
+# one per ref being pushed.
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+# shellcheck source=hooks/lib/protected-branches.sh
+source "$(dirname "$0")/lib/protected-branches.sh"
+
+hook_start "PRE-PUSH"
+
+while read -r LOCAL_REF LOCAL_SHA REMOTE_REF REMOTE_SHA; do
+  BRANCH_NAME="${REMOTE_REF#refs/heads/}"
+
+  if [[ "$BRANCH_NAME" =~ $PROTECTED_BRANCHES ]]; then
+    echo "Warning: you are pushing directly to protected branch '$BRANCH_NAME'."
+    echo "Make sure this push has already been reviewed (e.g. via a pull request)."
+  fi
+done
+
+hook_end "PRE-PUSH"

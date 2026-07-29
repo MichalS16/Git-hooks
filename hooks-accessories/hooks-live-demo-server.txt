@@ -1,0 +1,169 @@
+# Real terminal output from actually installing and running every
+# SERVER-SIDE hook in this repo (installed into a bare repository's own
+# hooks/, not a client's .git/hooks/ - see README "Hooks" for why).
+# Client-side hooks are in the sibling file
+# hooks-accessories/hooks-live-demo-client.txt.
+#
+# Nothing below was typed by hand: each block is copied verbatim from
+# running the real Git command against a throwaway bare/non-bare "server"
+# repo with the real hook script installed, author MichalS16. Where a
+# hook can both accept and reject something, both real outcomes are
+# shown. Long scratch-repo paths have been shortened to `<remote>`/
+# `<server>`/`<deploy_target>` for readability; nothing else was edited.
+#
+# See THEORY.md for what each hook is for and hooks/server-side/ for its
+# full commented source.
+
+--------------------------------------------------------------------------
+pre-receive - SUCCESS: first push to an empty bare repo (fast-forward)
+--------------------------------------------------------------------------
+$ git push origin main
+
+remote: HOOK - PRE-RECEIVE (server-side) - START:
+remote: HOOK - PRE-RECEIVE (server-side) - END
+To <remote>
+ * [new branch]      main -> main
+
+--------------------------------------------------------------------------
+pre-receive - REJECTED: force-push (non-fast-forward) to protected 'main'
+--------------------------------------------------------------------------
+$ git push origin main --force
+
+remote: HOOK - PRE-RECEIVE (server-side) - START:
+remote: Error: rejecting non-fast-forward push to protected branch 'main'.
+remote: Push rejected.
+To <remote>
+ ! [remote rejected] main -> main (pre-receive hook declined)
+error: failed to push some refs to '<remote>'
+
+--------------------------------------------------------------------------
+update - REJECTED: branch name doesn't follow the feature/fix/chore convention
+--------------------------------------------------------------------------
+$ git push origin randombranch
+
+remote: HOOK - UPDATE (server-side) - checking randombranch
+remote: Error: branch name 'randombranch' does not follow the 'feature/', 'fix/' or 'chore/' convention.
+remote: error: hook declined to update refs/heads/randombranch
+To <remote>
+ ! [remote rejected] randombranch -> randombranch (hook declined)
+error: failed to push some refs to '<remote>'
+
+--------------------------------------------------------------------------
+update - SUCCESS: branch name follows the convention
+--------------------------------------------------------------------------
+$ git push origin feature/new-widget
+
+remote: HOOK - UPDATE (server-side) - checking feature/new-widget
+To <remote>
+ * [new branch]      feature/new-widget -> feature/new-widget
+
+--------------------------------------------------------------------------
+post-receive - SUCCESS: deploys main to a configured work tree after the push
+--------------------------------------------------------------------------
+$ DEPLOY_WORK_TREE=<deploy_target> git push origin main
+
+remote: HOOK - POST-RECEIVE (server-side) - START:
+remote: Deploying main (51104ae7f154c9437d857c021c3d80ad8c280308) to <deploy_target>...
+remote: Already on 'main'
+remote: Deployment successful: latest code checked out to <deploy_target>.
+remote: HOOK - POST-RECEIVE (server-side) - END
+To <remote>
+   00e53fd..51104ae  main -> main
+
+(<deploy_target> really does contain the newly-pushed file afterwards.)
+
+--------------------------------------------------------------------------
+post-update - SUCCESS: reports the updated ref and refreshes info/refs
+--------------------------------------------------------------------------
+$ git push origin main
+
+remote: HOOK - POST-UPDATE (server-side) - START:
+remote: Ref updated: refs/heads/main
+remote: HOOK - POST-UPDATE (server-side) - END
+To <remote>
+   1611116..8e0e1fd  main -> main
+
+--------------------------------------------------------------------------
+push-to-checkout - SUCCESS: updates the server's checked-out working tree
+to match the push (requires receive.denyCurrentBranch=updateInstead on a
+non-bare server repo)
+--------------------------------------------------------------------------
+$ git push origin main
+
+HOOK - PUSH-TO-CHECKOUT (server-side) - updating working tree to be25f8d0df5eaec4fd218b0703789fd9219d6c19
+Working tree updated to be25f8d0df5eaec4fd218b0703789fd9219d6c19.
+HOOK - PUSH-TO-CHECKOUT (server-side) - END
+To <server>
+   f0a6846..be25f8d  main -> main
+
+(The pushed file really does appear in the server's working tree afterwards.)
+
+--------------------------------------------------------------------------
+push-to-checkout - REJECTED: the server's working tree has uncommitted
+local changes, so it refuses to overwrite them (the push itself is still
+accepted into the repo - only the working tree update is refused)
+--------------------------------------------------------------------------
+$ git push origin main
+
+HOOK - PUSH-TO-CHECKOUT (server-side) - updating working tree to e07d75bb684f034f317f00bd074e2846151ea144
+Error: the working tree has uncommitted local changes; refusing to update it via push.
+Push was still accepted into the repository - only the working tree wasn't updated.
+To <server>
+ ! [remote rejected] main -> main (push-to-checkout hook declined)
+error: failed to push some refs to '<server>'
+
+--------------------------------------------------------------------------
+proc-receive - SUCCESS: a push to refs/for/main is accepted and treated
+as "open a review" instead of moving main directly (Gerrit-style)
+--------------------------------------------------------------------------
+$ git push origin HEAD:refs/for/main
+
+remote: HOOK - PROC-RECEIVE (server-side) - START:
+remote: Note: would open a code review against 'main' for bee345f96917c2d9601c539b52df7e141775a074 (not actually implemented - example only).
+remote: HOOK - PROC-RECEIVE (server-side) - END
+To <remote>
+ * [new reference]   HEAD -> refs/for/main
+
+--------------------------------------------------------------------------
+proc-receive - REJECTED: pushing to a ref pattern this example doesn't
+recognize (only refs/for/* is handled)
+--------------------------------------------------------------------------
+$ git push origin HEAD:refs/drafts/main
+
+remote: HOOK - PROC-RECEIVE (server-side) - START:
+remote: HOOK - PROC-RECEIVE (server-side) - END
+To <remote>
+ ! [remote rejected] HEAD -> refs/drafts/main (proc-receive example only handles refs/for/* pushes)
+error: failed to push some refs to '<remote>'
+
+--------------------------------------------------------------------------
+reference-transaction - REJECTED: refuses to let a transaction delete the
+protected branch 'main' (installed into a plain .git/hooks/, since this
+hook is not push-specific - see hooks/server-side/reference-transaction)
+--------------------------------------------------------------------------
+$ git branch -D main
+
+HOOK - REFERENCE-TRANSACTION (server-side) - START (prepared):
+HOOK - REFERENCE-TRANSACTION (prepared): refs/heads/main  0000000000000000000000000000000000000000 -> 0000000000000000000000000000000000000000
+Error: refusing to delete protected branch 'main'.
+HOOK - REFERENCE-TRANSACTION (server-side) - START (aborted):
+HOOK - REFERENCE-TRANSACTION (aborted): refs/heads/main  0000000000000000000000000000000000000000 -> 0000000000000000000000000000000000000000
+HOOK - REFERENCE-TRANSACTION (server-side) - END
+fatal: in 'prepared' phase, update aborted by the reference-transaction hook
+
+--------------------------------------------------------------------------
+reference-transaction - SUCCESS: logs an ordinary branch creation
+(unrelated ref names like AUTO_MERGE/HEAD that Git also fires this hook
+for, and Git's undocumented extra "preparing" state alongside the
+documented "prepared"/"committed"/"aborted", are omitted here for
+readability - they appeared in the real run too, just not relevant to
+this example)
+--------------------------------------------------------------------------
+$ git branch feature/tracked
+
+HOOK - REFERENCE-TRANSACTION (server-side) - START (prepared):
+HOOK - REFERENCE-TRANSACTION (prepared): refs/heads/feature/tracked  0000000000000000000000000000000000000000 -> 0e5a6e86318663a2e2648b3d324609d07a8a6cf0
+HOOK - REFERENCE-TRANSACTION (server-side) - END
+HOOK - REFERENCE-TRANSACTION (server-side) - START (committed):
+HOOK - REFERENCE-TRANSACTION (committed): refs/heads/feature/tracked  0000000000000000000000000000000000000000 -> 0e5a6e86318663a2e2648b3d324609d07a8a6cf0
+HOOK - REFERENCE-TRANSACTION (server-side) - END

@@ -1,0 +1,27 @@
+#!/bin/bash
+# A Git applypatch-msg hook example.
+# The `git am` (apply mailbox patch) equivalent of commit-msg: runs after
+# the patch's commit message is extracted, before the patch is applied.
+# Git calls this with the path to the message file as $1.
+# Reuses the same validation as commit-msg so patches applied via `git am`
+# are held to the same message-quality standard as regular commits.
+
+set -uo pipefail
+
+MSG_FILE="$1"
+MSG_FIRST_LINE="$(head -n 1 "$MSG_FILE")"
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+# shellcheck source=hooks/lib/validate-message.sh
+source "$(dirname "$0")/lib/validate-message.sh"
+
+hook_start "APPLYPATCH-MSG"
+
+if ! validate_message_length "$MSG_FIRST_LINE"; then
+  echo "Aborting 'git am'."
+  exit 1
+fi
+
+echo "Patch message accepted."
+hook_end "APPLYPATCH-MSG"

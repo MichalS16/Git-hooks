@@ -1,0 +1,22 @@
+#!/bin/bash
+# A Git post-applypatch hook example.
+# The last hook in the `git am` trio: runs after `git am` has committed
+# a patch, too late to reject anything (like post-commit, its exit code
+# is informational only). Git calls this with no arguments.
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+
+hook_start "POST-APPLYPATCH"
+
+# A common real-world use of this hook: log that a patch was applied via
+# `git am`, the same way post-commit logs an ordinary commit, so patches
+# coming from a mailing-list-style workflow show up in the same trail.
+COMMIT_HASH="$(git rev-parse HEAD)"
+COMMIT_MESSAGE="$(git log -1 --pretty=format:"%s")"
+
+echo "Patch applied via 'git am': $COMMIT_HASH - $COMMIT_MESSAGE"
+
+hook_end "POST-APPLYPATCH"

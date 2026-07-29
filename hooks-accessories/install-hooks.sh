@@ -2,35 +2,49 @@
 
 # This script copies hooks from the 'hooks/' folder to the '.git/hooks/' folder
 # and adjusts line endings based on the detected OS environment.
-# Can run this script manually: bash hooks-accessories/install-hooks.sh
+#
+# Run this manually after cloning, and again any time hooks/ changes:
+#   bash hooks-accessories/install-hooks.sh
+#
+# This is intentionally a manual, explicit step and is not invoked
+# automatically by any hook. See README "Security Considerations".
+
+set -uo pipefail
 
 # Function to detect OS and convert line endings
 function convert_line_endings() {
   local PATH_TO_HOOKS=$1  # Get the path passed as the first argument
+  local CONVERTER=""
 
-  # First check if we're in a Bash-like environment with $OSTYPE
+  # Determine which converter this OS needs: dos2unix on Unix-like
+  # systems, unix2dos on anything Windows-like (Git Bash/MSYS/Cygwin, or
+  # native Windows detected via $WINDIR when $OSTYPE isn't set).
   if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* || "$OSTYPE" == "freebsd"* ]]; then
-    # Unix-like system (Linux, macOS, FreeBSD)
-    echo "Detected Unix-like system. Running dos2unix on hooks..."
-    dos2unix $PATH_TO_HOOKS/post-commit
-    dos2unix $PATH_TO_HOOKS/pre-commit
-  elif [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    # Git Bash on Windows or Cygwin/MSYS
-    echo "Detected Windows-like system using Git Bash or MSYS. Running unix2dos on hooks..."
-    unix2dos $PATH_TO_HOOKS/post-commit
-    unix2dos $PATH_TO_HOOKS/pre-commit
+    echo "Detected Unix-like system."
+    CONVERTER="dos2unix"
+  elif [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || -n "${WINDIR:-}" ]]; then
+    echo "Detected Windows-like system (Git Bash, MSYS, Cygwin, or native Windows)."
+    CONVERTER="unix2dos"
   else
-    # If $OSTYPE isn't available, check the OS using PowerShell or CMD environment variable
-    if [[ -n "$WINDIR" ]]; then
-      # We're on Windows (PowerShell/CMD)
-      echo "Detected native Windows environment. Running unix2dos on hooks..."
-      unix2dos $PATH_TO_HOOKS/post-commit
-      unix2dos $PATH_TO_HOOKS/pre-commit
-    else
-      echo "Unknown OS type. Please manually check your environment."
-      exit 1
-    fi
+    echo "Unknown OS type. Please manually check your environment."
+    exit 1
   fi
+
+  if ! command -v "$CONVERTER" >/dev/null 2>&1; then
+    echo "Error: '$CONVERTER' is not installed or not on PATH. Install it and re-run."
+    exit 1
+  fi
+
+  echo "Running $CONVERTER on hooks..."
+  # Convert every file under hooks/, recursively - not just the hook
+  # scripts directly in hooks/, but also hooks/lib/*.sh (sourced by
+  # several hooks) and hooks/server-side/* (copied by the cp -r below
+  # even though they aren't installed into a client's .git/hooks/) -
+  # so nothing that gets copied is left with unconverted line endings.
+  local HOOK_FILE
+  while IFS= read -r -d '' HOOK_FILE; do
+    "$CONVERTER" "$HOOK_FILE"
+  done < <(find "$PATH_TO_HOOKS" -type f -print0)
 }
 
 # Call the function to convert line endings based on OS

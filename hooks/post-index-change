@@ -1,0 +1,29 @@
+#!/bin/bash
+# A Git post-index-change hook example.
+# Runs whenever Git updates the index/working tree in a way that could
+# affect it as a whole - e.g. after `git checkout`/`git reset`/`git
+# read-tree` - not tied to a commit at all, unlike most other
+# client-side hooks here. Intended for IDE-style tools that watch the
+# index for changes (e.g. to trigger a rebuild or refresh a UI) without
+# having to poll the filesystem themselves.
+#
+# Git calls this with two flags: $1 is 1 if the working tree was
+# updated, $2 is 1 if only the index (not the working tree) changed.
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+
+WORKING_TREE_UPDATED="$1"
+INDEX_ONLY_UPDATED="$2"
+
+hook_start "POST-INDEX-CHANGE"
+
+if [ "$WORKING_TREE_UPDATED" = "1" ]; then
+  echo "Working tree updated - a tool watching the index (e.g. an IDE or file watcher) should refresh."
+elif [ "$INDEX_ONLY_UPDATED" = "1" ]; then
+  echo "Index updated without touching the working tree (e.g. after 'git add')."
+fi
+
+hook_end "POST-INDEX-CHANGE"

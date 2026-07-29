@@ -1,0 +1,28 @@
+#!/bin/bash
+# A Git post-rewrite hook example.
+# Runs after commands that rewrite commits: `git commit --amend` and
+# `git rebase` (but not `git reset`, which doesn't count as a "rewrite").
+# Git calls this with the command that triggered it ("amend" or "rebase")
+# as $1, and feeds "<old sha1> <new sha1> [extra info]" lines on stdin,
+# one per rewritten commit.
+
+set -uo pipefail
+
+# shellcheck source=hooks/lib/banner.sh
+source "$(dirname "$0")/lib/banner.sh"
+
+COMMAND="$1"
+
+hook_start "POST-REWRITE" "$COMMAND"
+
+REWRITTEN_COUNT=0
+while read -r OLD_SHA NEW_SHA _REST; do
+  REWRITTEN_COUNT=$((REWRITTEN_COUNT + 1))
+done
+
+echo "$REWRITTEN_COUNT commit(s) rewritten via '$COMMAND'."
+if [ "$COMMAND" = "rebase" ] && [ "$REWRITTEN_COUNT" -gt 0 ]; then
+  echo "Note: commit hashes changed. If you already pushed this branch, you'll need to force-push (with --force-with-lease)."
+fi
+
+hook_end "POST-REWRITE"

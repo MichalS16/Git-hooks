@@ -1,216 +1,57 @@
+# This file is appended to by hooks/pre-commit (author/date, before the
+# commit exists) and hooks/post-commit (hash/message, after), only when
+# those two hooks are actually installed into .git/hooks/ in a live repo.
+# The Bats test suite never touches this file - each test runs its hook
+# in a disposable scratch repo instead, so the project's own repo and log
+# are never modified by running the tests. See README "Hooks" for details.
+#
+# Everything below this line is real output, copied verbatim from
+# hooks-accessories/commit-log.txt after actually installing pre-commit/
+# post-commit in a throwaway scratch repo and running real commits there
+# (not typed by hand). pre-commit logs and stages the Author/Date block
+# BEFORE it runs Flake8/Pytest/coverage, so a commit pre-commit goes on to
+# reject still leaves that half-entry behind - no matching "Commit hash"
+# block follows it. The "[REJECTED]"/"[SUCCESS]" markers below are added
+# here, inline, so that pattern is visible without cross-referencing
+# anything; the hooks themselves never write those markers.
 ------------------------------------------------
-Commit hash: fdb9b293044fb8753242ceacd35330af693b0de7
-Author: DavidK
-Date: Sun Oct 13 15:05:46 2024 +0200
-Message: Hooks - post-commit - add logging code
+[REJECTED by pre-commit] bad_code.py had 4 Flake8 violations - unused
+import, missing blank line, stray whitespace, no spaces around "=":
+  .\bad_code.py:1:1: F401 'os' imported but unused
+  .\bad_code.py:2:1: E302 expected 2 blank lines, found 0
+  .\bad_code.py:2:9: E201 whitespace after '('
+  .\bad_code.py:3:6: E225 missing whitespace around operator
+Pytest/coverage never ran - Flake8 aborted the commit first.
+Fix: cleaned up the file (renamed to good_code.py), added a passing test.
+Author: MichalS16
+Date: Wed Jul 29 14:32:32     2026
 
 ------------------------------------------------
-Commit hash: ff522bef6d6181f80e35ccb13fd7c7668c190f1d
-Author: DavidK
-Date: Sun Oct 13 20:58:43 2024 +0200
-Message: Hooks - post-commit - improve logging code to amend the commit with the log file
+[SUCCESS] Flake8 clean, 1 test passed, 100% coverage.
+Author: MichalS16
+Date: Wed Jul 29 14:32:42     2026
 
 ------------------------------------------------
-Commit hash: 6b5b758af699a8ad6131855c32e22375318a3995
-Author: DavidK
-Date: Sun Oct 13 21:06:40 2024 +0200
-Message: Hooks - post-commit - add an automatic push code
+Commit hash: 37ca2e7638a819ce7305d6ed3d3ebf01bbff6d1b
+Author: MichalS16
+Date: Wed Jul 29 14:32:42 2026 +0200
+Message: Add a small Python utility with a passing test
 
 ------------------------------------------------
-Commit hash: 1832df72187d9d8f3e2ef7d063e3fd71ed490d4d
-Author: DavidK
-Date: Sun Oct 13 21:14:41 2024 +0200
-Message: Hooks - post-commit - comment out the Push code for safety purposes
+[REJECTED by pre-commit] Added function bar() and a test for it, but
+forgot to import bar in the test file:
+  .\test_good_code.py:9:12: F821 undefined name 'bar'
+Fix: added `bar` to the existing `from good_code import foo` line.
+Author: MichalS16
+Date: Wed Jul 29 14:32:54     2026
 
 ------------------------------------------------
-Commit hash: 0674081b1fd25c03e81ff791620d2e9b2930a964
-Author: DavidK
-Date: Sun Oct 13 21:20:14 2024 +0200
-Message: Hooks - post-commit - add Notifications to Slack and edit documentation
+[SUCCESS] Flake8 clean, 2 tests passed, 100% coverage.
+Author: MichalS16
+Date: Wed Jul 29 14:33:02     2026
 
 ------------------------------------------------
-Commit hash: 5113eed4b8ec2dc4ac5ba70a669371971fa97417
-Author: DavidK
-Date: Sun Oct 13 21:25:36 2024 +0200
-Message: Hooks - post-commit - improve Notifications to Slack
-
-------------------------------------------------
-Commit hash: 433b8699605ee16804faf974ad68b5d8b5e11e8f
-Author: DavidK
-Date: Sun Oct 13 22:46:31 2024 +0200
-Message: Hooks - post-commit - add Notification to Discord
-
-------------------------------------------------
-Commit hash: 74109ce07f5443c9664ad8a2772a72d33ae0856b
-Author: DavidK
-Date: Sun Oct 13 23:17:51 2024 +0200
-Message: Hooks - post-commit - create a secrets.txt file with webhook URLs (to be encrypted)
-
-------------------------------------------------
-Commit hash: 2b0f299549dd3a0393a8a2faa83b9aaade415db8
-Author: DavidK
-Date: Sun Oct 13 23:19:46 2024 +0200
-Message: Hooks - post-commit - retrieve webhook URLs from secrets.txt (to be encrypted)
-
-------------------------------------------------
-Commit hash: ca4bc0873c9ae4a3e063d72842653c2857ad99b5
-Author: DavidK
-Date: Sun Oct 13 23:25:56 2024 +0200
-Message: Hooks - post-commit - added quotes to URLs in secrets.txt, a testing commit
-
-------------------------------------------------
-Commit hash: d9574736509b1a49d2b30230e12c351c6373144e
-Author: DavidK
-Date: Mon Oct 14 01:39:53 2024 +0200
-Message: Hooks - post-commit - Add git-crypt configuration and encrypted key
-
-------------------------------------------------
-Commit hash: 4f30efbd119e0ea147687ce8255b06f1a49002e5
-Author: DavidK
-Date: Tue Oct 15 23:52:03 2024 +0200
-Message: Hooks - post-commit - Edit git-crypt configuration
-
-------------------------------------------------
-Commit hash: 69aabfa015a7256f2806d9404563e3e1e4e38cc9
-Author: DavidK
-Date: Wed Oct 16 00:10:21 2024 +0200
-Message: Hooks - post-commit - Edit Slack notification
-
-------------------------------------------------
-Commit hash: f69d40677644132613dfed9e1a18be93b91b0f9d
-Author: DavidK
-Date: Wed Oct 16 00:34:13 2024 +0200
-Message: Hooks - post-commit - Modify Notifications so variables are more robust to whitespaces
-
-------------------------------------------------
-Commit hash: 12c5c8c6cd5648bf44f77445621ae8e0a883f7f1
-Author: DavidK
-Date: Wed Oct 16 01:04:22 2024 +0200
-Message: Hooks - post-commit - Modify secret.txt, removed old leaked URLs, regenerated new encrypted
-
-------------------------------------------------
-Commit hash: 9be79a022222fd34b5d110309f2611daa1a33591
-Author: DavidK
-Date: Wed Oct 16 12:09:36 2024 +0200
-Message: Hooks - post-commit - Edit example.ipynb, Installing the hooks and the line endings issues, and updated the post-commit hook bash code used in the script
-
-------------------------------------------------
-Commit hash: 64ea4dadfcd552488a7396ea0691bbb0d3fff17e
-Author: DavidK
-Date: Wed Oct 16 23:20:18 2024 +0200
-Message: Merge branch 'post-commit' into hooks-examples
-
-------------------------------------------------
-Commit hash: ab6880269c98f6e9663a7023157ecdf31d5a79fa
-Author: DavidK
-Date: Wed Oct 16 23:21:18 2024 +0200
-Message: Edit pre-commit - remove a debugging line
-
-------------------------------------------------
-Commit hash: 96b91b0606b0365103a845fb02365cddb3cae381
-Author: DavidK
-Date: Wed Oct 16 23:30:26 2024 +0200
-Message: Edit example.ipynb - documentation, redo code cell formatting into markdown and bash tags
-
-------------------------------------------------
-Commit hash: 1ef87594fc469780e4ecbd4435e0de9c64df3c01
-Author: DavidK
-Date: Wed Oct 16 23:35:27 2024 +0200
-Message: Edit example.ipynb - documentation, redo code cell formatting into markdown and bash tags
-
-------------------------------------------------
-Commit hash: 70c77f51a62f8c2341385ecc87e57271d0635104
-Author: DavidK
-Date: Wed Oct 16 23:37:57 2024 +0200
-Message: Edit example.ipynb - documentation, redo code cell formatting into markdown and bash tags
-
-------------------------------------------------
-Commit hash: d3d4f49e5f17204854f2b9ab789884ef32296e4f
-Author: DavidK
-Date: Wed Oct 16 23:57:18 2024 +0200
-Message: Edit install-hooks.sh - correct an EOF error
-
-------------------------------------------------
-Commit hash: 993d8cdf511f9e54b7d33c605962683f7adc1f8f
-Author: DavidK
-Date: Thu Oct 17 00:07:58 2024 +0200
-Message: Edit install-hooks.sh - correct an EOF error that was caused by copying CRLF pre-commit into .git/hooks folder and corrupting the currently running pre-commit
-
-------------------------------------------------
-Commit hash: 549cf4e2f89a6749ae6418744d537fd0dbac0176
-Author: DavidK
-Date: Thu Oct 17 00:08:59 2024 +0200
-Message: Edit install-hooks.sh - correct an EOF error that was caused by copying CRLF pre-commit into .git/hooks folder and corrupting the currently running pre-commit
-
-------------------------------------------------
-Commit hash: ed569e072cb86e3b58309eb1682c5753944ca80c
-Author: DavidK
-Date: Thu Oct 17 00:10:38 2024 +0200
-Message: Edit install-hooks.sh - correct an EOF error that was caused by copying CRLF pre-commit into .git/hooks folder and corrupting the currently running pre-commit, clean up other things
-
-------------------------------------------------
-Commit hash: 5b28c82dd58eaae2990699ad7b147ff3cf0fef4b
-Author: DavidK
-Date: Thu Oct 17 00:14:26 2024 +0200
-Message: Edit example.ipynb - documentation
-
-------------------------------------------------
-Commit hash: 43becc147c08d74f15be99b80003efd5db427dc7
-Author: DavidK
-Date: Thu Oct 17 00:18:11 2024 +0200
-Message: Edit example.ipynb - documentation
-
-------------------------------------------------
-Commit hash: 4f07bdfc38e359430e2337ce73891973de3c8dd2
-Author: DavidK
-Date: Thu Oct 17 17:07:29 2024 +0200
-Message: Edit line endings comment for Unix-systems
-
-------------------------------------------------
-Commit hash: 128faaf8a7559dc91027eabe5701f6cbd163bdfb
-Author: DavidK
-Date: Thu Oct 17 20:56:35 2024 +0200
-Message: Documentation - cosmetic edits
-
-------------------------------------------------
-Commit hash: 60d7f9d8d84dae02a980271832c9ad94bcabdf5b
-Author: DavidK
-Date: Thu Oct 17 21:17:33 2024 +0200
-Message: Organisation of files to folders, updated paths to the install-hooks.sh in scripts.
-
-------------------------------------------------
-Commit hash: 7990ba1de2d265761d6690bdc0c116380ab15ef3
-Author: DavidK
-Date: Thu Oct 17 21:18:16 2024 +0200
-Message: Organisation of files to folders, updated paths to the install-hooks.sh in scripts.
-
-------------------------------------------------
-Commit hash: dd757efa8eec76d61cb3c9de28efcb1b39f3655e
-Author: DavidK
-Date: Thu Oct 17 22:02:21 2024 +0200
-Message: Documentation - hook examples formatting
-
-------------------------------------------------
-Commit hash: 7277ca08343fbf09c1c0138ff4d978be79bac026
-Author: DavidK
-Date: Thu Oct 17 22:11:48 2024 +0200
-Message: Documentation - post-commit hook formatting
-
-------------------------------------------------
-Commit hash: 83f44a9e840bdc084ac0f21a3b47927f48f3f5dc
-Author: DavidK
-Date: Thu Oct 17 22:39:39 2024 +0200
-Message: Documentation - edit Installation description
-
-------------------------------------------------
-Commit hash: 815593079f06dac59247cc5fc244e4cd0a67ca69
-Author: DavidK
-Date: Thu Oct 17 22:46:33 2024 +0200
-Message: Documentation - edit Installation description, add our live output picture
-
-------------------------------------------------
-Commit hash: 8cfeacdae6c947adaffccb9ae51ca5daf94222f5
-Author: DavidK
-Date: Thu Oct 17 22:58:58 2024 +0200
-Message: Documentation - edit post-commit hook, add pictures with log and notifications
-
+Commit hash: 75547e05578af45b7196a7acc451b57a08937f04
+Author: MichalS16
+Date: Wed Jul 29 14:33:02 2026 +0200
+Message: Extend utility with a second function and test

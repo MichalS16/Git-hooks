@@ -1,0 +1,32 @@
+#!/bin/bash
+# A Git update server-side hook example.
+#
+# Like pre-receive (see the sibling file), this belongs on the Git server,
+# in the bare repository's hooks/ directory - not in a client's
+# .git/hooks/. The difference from pre-receive is granularity: Git invokes
+# `update` once per ref being updated, as separate arguments, rather than
+# once for the whole push via stdin. That makes it convenient for
+# per-branch checks like this one.
+#
+# Git calls this with: <ref name> <old sha1> <new sha1>
+
+set -uo pipefail
+
+REF_NAME="$1"
+OLD_SHA="$2"
+NEW_SHA="$3"
+
+BRANCH_NAME="${REF_NAME#refs/heads/}"
+
+echo "HOOK - UPDATE (server-side) - checking $BRANCH_NAME"
+
+# Enforce a simple branch naming convention server-side, since this can't
+# be bypassed the way a client-side hook could be.
+# Keep the main/master part of this pattern in sync with
+# hooks/lib/protected-branches.sh and hooks/server-side/pre-receive.
+if [[ "$REF_NAME" == refs/heads/* ]] && [[ ! "$BRANCH_NAME" =~ ^(main|master|(feature|fix|chore)/.+)$ ]]; then
+  echo "Error: branch name '$BRANCH_NAME' does not follow the 'feature/', 'fix/' or 'chore/' convention."
+  exit 1
+fi
+
+exit 0
